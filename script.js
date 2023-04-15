@@ -118,7 +118,7 @@ function fillPage() {
                 <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
                 <img class="automatempBlock__logo2" src="https://static.tildacdn.com/tild3436-3731-4466-b732-646465616236/1401a47a-25ef-4d45-b.svg"/>
               </a>
-              <button class="automatemp__logoButton__button" onClick="alert('Функционал пока в разработке')">Скачать выдачу</button>
+              <button class="automatemp__logoButton__button btn-main" onClick="alert('Функционал пока в разработке')">Скачать выдачу</button>
             </div>
           </div>
 
@@ -147,7 +147,7 @@ function fillPage() {
                       <h6 class="automatempBlock__item__title">${item1.name}</h6>
                       <p class="automatempBlock__item__label">${item1.brand}</p>
                       <div class="automatempBlock__item__addition">
-                        <p class="automatempBlock__item__price">${item.cpm} ₽</p>
+                        <p class="automatempBlock__item__price">${new Intl.NumberFormat('ru-RU').format(item.cpm)} ₽</p>
                         <p class="automatempBlock__item__time">${item1.time1 + item1.time2}ч</p>
                       </div>
                     </div>
@@ -269,9 +269,11 @@ function fillPage() {
                 `
             <tr class="categoryPriority__tbody__tr">
               <td class="categoryPriority__tbody__td categoryPriority__tbody__td__withimg">
+                <a class="categoryPriority__tbody__td__img__link" href="https://www.wildberries.ru/catalog/${item.id}/detail.aspx">
                 <img class="categoryPriority__tbody__td__img" src="https:${ImgLinkSlice(
                   item.id
                 )}/images/big/1.jpg"/>
+                </a>
               </td>
               <td class="categoryPriority__tbody__td">${item.page}</td>
               <td class="categoryPriority__tbody__td">${item.pos}</td>
@@ -280,7 +282,7 @@ function fillPage() {
               <td class="categoryPriority__tbody__td">${item.rating}</td>
               <td class="categoryPriority__tbody__td">${item.quantity}</td>
               <td class="categoryPriority__tbody__td">${item.time} ч</td>
-              <td class="categoryPriority__tbody__td">${item.cpm} ₽</td>
+              <td class="categoryPriority__tbody__td">${new Intl.NumberFormat('ru-RU').format(item.cpm)} ₽</td>
             </tr>
           `
               );
@@ -315,7 +317,7 @@ function fillCardPage() {
     waitForElm('#automatempBlock__card__list').then((elm)=>{
       cpmData.forEach((item, index) => {
         elm.insertAdjacentHTML('beforeend', `
-          <li class="automatempBlock__card__list__item">${index+1} - ${item.cpm}</li>
+          <li class="automatempBlock__card__list__item">${index + 1} - ${new Intl.NumberFormat('ru-RU').format(item.cpm) }</li>
         `)
       });
     })
@@ -366,7 +368,7 @@ function fillPromos(wheel) {
       if (foundPromo && !foundPromo.querySelector('.automatempBlock__promo__card')) {
         foundPromo.children[0].classList.add('automatempBlock__promo__card__img')
         let el = foundPromo.querySelector('.product-card__tip--promo')
-        el.innerHTML = `Промотовар - ${code.cpm} ₽`;
+        el.innerHTML = `Промотовар - ${new Intl.NumberFormat('ru-RU').format(code.cpm) } ₽`;
       }
     })
   }
