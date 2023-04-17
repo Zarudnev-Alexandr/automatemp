@@ -44,7 +44,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
             }
           }
         } else {
-          console.log('Некорректный ввод 1');
         }
       });
 
@@ -59,7 +58,6 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
           arr4 = data.priority_categories;
           arr5 = data.time_info;
         } else {
-          console.log('Некорректный ввод 2');
         }
       });
     fetchSecondFetch();
@@ -102,15 +100,67 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     function fetchPromo() {
       if (arr7.length != 0) {
         chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-          console.log(arr7);
           chrome.tabs.sendMessage(tabs[0].id, { promos: arr7, msg: 'getPromos' });
         })
-      }else{
+      } else {
         setTimeout(fetchPromo, 10);
       }
     }
   }
 
+  else if (message.command === 'unitEconom') {
+    let arr8 = []
+    let arr9 = []
+    let arr10 = []
+
+    fetch(`https://4947.ru/wb_extension/api/size/${message.id}`)
+      .then(response => response.json())
+      .then((data) => {
+        arr8 = data
+      });
+    fetch(`https://4947.ru/wb_extension/api/commission/${message.id}`)
+      .then(response => response.json())
+      .then((data) => {
+        arr9 = data
+      });
+    fetch(`https://4947.ru/wb_extension/api/warehouse`)
+      .then(response => response.json())
+      .then((data) => {
+        arr10 = data
+      });
+
+    fetchUnitEconom()
+    function fetchUnitEconom() {
+      if (arr8.length !== 0 && arr9.length !== 0 && arr10.length !== 0) {
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+          chrome.tabs.sendMessage(tabs[0].id, { size: arr8, commissions: arr9, wareHouses: arr10, msg: 'getUnitEconom' });
+        })
+      } else {
+        setTimeout(fetchUnitEconom, 10);
+      }
+    }
+  }
+
+  else if (message.command === 'logistic') {
+    let arr11 = []
+    fetch(`https://4947.ru/wb_extension/api/logistic/${message.article_id}/${message.warehouse_id}`)
+      .then(response => response.json())
+      .then((data) => {
+        arr11 = data;
+      });
+
+    fetchLogistic()
+    function fetchLogistic() {
+      if (arr11.length !== 0) {
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+          chrome.tabs.sendMessage(tabs[0].id, { logistic: arr11, msg: 'getLogistic' });
+          console.log(arr11);
+        })
+      }else{
+        setTimeout(fetchLogistic, 10);
+      }
+    }
+  }
   return true;
 });
 

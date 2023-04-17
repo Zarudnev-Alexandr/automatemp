@@ -32,6 +32,8 @@ function getData() {
     waitForElm('#productNmId').then((elm) => {
       prodId = document.getElementById('productNmId').innerText;
       chrome.runtime.sendMessage({ command: 'cardPromoBlock', id: prodId }, (response) => { })
+      chrome.runtime.sendMessage({ command: 'unitEconom', id: prodId }, (response) => { })
+
     })
   }
 }
@@ -43,6 +45,10 @@ let priorityCategoriesData = [];
 let timeInfoData = [];
 let cpmData = [];
 let promos = [];
+let size = [];
+let commissions = [];
+let wareHouses = [];
+let logistic = [];
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
   if (request.msg) {
@@ -66,6 +72,25 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
         promos = request.promos;
         console.log(promos);
         fillPromos(false);
+        break;
+      case 'getUnitEconom':
+        size = request.size
+        commissions = request.commissions
+        wareHouses = request.wareHouses
+        console.log(size);
+        console.log(commissions);
+        console.log(wareHouses);
+        if (size.length !== 0 && commissions.length !== 0 && wareHouses.length !== 0) {
+          var prodId;
+          waitForElm('#productNmId').then((elm) => {
+            prodId = document.getElementById('productNmId').innerText;
+            chrome.runtime.sendMessage({ command: 'logistic', article_id: prodId, warehouse_id: wareHouses[0].id }, (response) => { })
+          })
+        }
+      case 'getLogistic':
+        logistic = request.logistic
+        console.log(logistic);
+        if (size && commissions && wareHouses && logistic) unitEconomFillPage();
     }
   } else {
     if (request === 200) {
@@ -228,9 +253,6 @@ function fillPage() {
           (priorityCategoriesData.length !== 0 && timeInfoData.length !== 0) ||
           tableCardsData.length !== 0
         ) {
-          // console.log(priorityCategoriesData);
-          // console.log(timeInfoData);
-          // console.log(tableCardsData);
           priorityCategoriesData.forEach((item, index) => {
             document.getElementById('categoryPriority__tbody').insertAdjacentHTML(
               'beforeend',
@@ -296,7 +318,7 @@ function fillPage() {
       chrome.runtime.sendMessage({ command: 'getPromos', text: searchText }, (response) => {
       })
     })
-  } 
+  }
 }
 
 
@@ -314,15 +336,286 @@ function fillCardPage() {
         </div>
       `)
     })
-    waitForElm('#automatempBlock__card__list').then((elm)=>{
+    waitForElm('#automatempBlock__card__list').then((elm) => {
       cpmData.forEach((item, index) => {
         elm.insertAdjacentHTML('beforeend', `
-          <li class="automatempBlock__card__list__item">${index + 1} - ${new Intl.NumberFormat('ru-RU').format(item.cpm) }</li>
+          <li class="automatempBlock__card__list__item">${index + 1} - ${new Intl.NumberFormat('ru-RU').format(item.cpm)}</li>
         `)
       });
     })
+
+    //btn-main -> btn-base
+    waitForElm('#options').then((elm) => {
+      elm.insertAdjacentHTML('beforeend', `
+        <div class="automatempSertif" id="automatempSertif">
+          <button class="btn-base">Заказать сертификацию</button>
+          <div class="automatempSertif__btn__img__block">
+            <button class="automatempSertif__mini__btn automatempSertif__info__btn">
+            </button>
+            <button class="automatempSertif__mini__btn">
+            </button>
+          </div>
+        </div>     
+      `)
+    })
   }
 }
+
+function unitEconomFillPage() {
+  if (size.length !== 0 && commissions.length !== 0 && wareHouses.length !== 0 && logistic.length !== 0) {
+    waitForElm('.product-page__details-section').then((elm) => {
+      elm.insertAdjacentHTML('beforeend', `
+    <div class="autmatemp__unitEconom__block">
+      <h2 class="automatemp__unitEconom__title">Юнит экономика</h2>
+
+      <div class="details-section__details details-section__details--about details">
+        <div class="details__content collapsable"
+          data-link="class{merge: !(selectedNomenclature^groupedAddedOptions &amp;&amp; selectedNomenclature^groupedAddedOptions^length > 0) toggle='hide'}">
+          <div
+            data-link="{collapsibleBlock btnClass='j-parameters-btn j-wba-card-item j-wba-card-item-show' nameForWba='Item_Parameters_More' itemSelector='.j-add-info-section' maxCollapsedHeight=(~wbSettings^displayMode=='m' ? 76 : 224) collapsedMsg='Развернуть характеристики' unCollapsedMsg='Свернуть характеристики' useGradient=true}"
+            data-jsv="#345^/345^">
+            <div class="collapsable__content j-add-info-section" id="automatemp__collapsable"  -webkit-line-clamp: initial;">
+              <div class="product-params"
+                data-link="{include tmpl='productCardOptions' ^~groupedAddedOptions=selectedNomenclature^groupedAddedOptions ~showCategoryName=true}">
+
+                <table class="product-params__table">
+                  <caption data-jsv="#346^#159_" class="product-params__caption">Габариты</caption>
+                  <tbody data-jsv="/159_/346^" data-jsv-df="">
+                    <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>Высота упаковки</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${size.height} см</span>
+                      </td>
+                    </tr>
+                    <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>Ширина упаковки</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${size.width} см</span>
+                      </td>
+                    </tr>
+                    <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>Длина упаковки</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${size.length} см</span>
+                      </td>
+                    </tr>
+                    <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>Объем</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${size.weight} л</span>
+                      </td>
+                    </tr>
+                    <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>КГТ</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${size.is_kgt ? 'Да' : 'Нет'}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <table class="product-params__table">
+                  <caption data-jsv="#346^#159_" class="product-params__caption">Комиссия *</caption>
+                  <tbody data-jsv="/159_/346^" data-jsv-df="">
+                    <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>FBO</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${commissions.fbo.part}% - ${commissions.fbo.amount} ₽</span>
+                      </td>
+                    </tr>
+                    <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>FBS</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${commissions.fbs.part}% - ${commissions.fbs.amount} ₽</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+
+                <h3 class="product-params__caption automatemp__unitEconom__table__title">Логистика, хранение и приёмка *</h3>
+                <select class="automatemp__unitEconom__select" id="#automatemp__unitEconom__select">
+                  <option disabled selected>Выберите склад</option></select>
+
+                </select>
+                <table class="product-params__table automatemp__logistic__table">
+                  <tbody class="automatemp__logistic__table__tbody">
+                    <tr class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>Логистика</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${logistic.logistic_amount} ₽</span>
+                      </td>
+                    </tr>
+                    <tr class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>От клиента</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${logistic.from_client} ₽</span>
+                      </td>
+                    </tr>
+                    <tr class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>Хранение</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${logistic.storage_amount} ₽ в день</span>
+                      </td>
+                    </tr>
+                    <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                      <th class="product-params__cell"> 
+                        <span class="product-params__cell-decor">
+                          <span>Приемка</span>
+                        </span>
+                      </th>
+                      <td class="product-params__cell">
+                        <span>${logistic.reception > 0 ? `x${logistic.reception}` : (logistic.reception = 0 ? 'бесплатно' : 'недоступно')}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+              </div>
+            </div>
+            <div class="collapsible__bottom">
+              <div class="collapsible__gradient" id="automatemp__collapsible__gradient" data-link="class{merge: !isCollapsed toggle='hide'}"></div>
+              <div class="collapsible__toggle-wrap">
+                <button class="collapsible__toggle j-parameters-btn j-wba-card-item j-wba-card-item-show" id="automatemp__card__table__button"
+                  data-name-for-wba="Item_Parameters_More"
+                  data-link="text{:isCollapsed ? collapsedMsg : unCollapsedMsg}class{merge: !isCollapsed &amp;&amp; !unCollapsedMsg toggle=&quot;hide&quot;}{on toggleCollapse !isCollapsed}"
+                  type="button" data-jsv="#554^/554^">Развернуть характеристики</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `)
+    })
+  }
+}
+waitForElm('#automatemp__card__table__button').then((elm) => {
+  elm.addEventListener('click', function () {
+    let table = document.querySelector('#automatemp__collapsible__gradient');
+    if (table.classList.contains('hide')) {//Если блок открыт
+      table.classList.remove('hide')//Удаляем скрытие градиента
+      document.querySelector("#automatemp__collapsable").style.maxHeight = '224px';//Обрубаем блок по высоте
+      elm.textContent = 'Развернуть юнит экономику'
+    } else {
+      table.classList.add('hide')
+      document.querySelector("#automatemp__collapsable").style.maxHeight = 'none';//Раскрываем блок по высоте
+      elm.textContent = 'Свернуть юнит экономику'
+    }
+  });
+})
+
+waitForElm('.automatemp__unitEconom__select').then((elm) => {
+  var selectString = '';
+  wareHouses.forEach(item => {
+    selectString += `<option value="${item.id}">${item.name}</option>`;
+  });
+  [...document.getElementsByClassName('automatemp__unitEconom__select')].forEach(elem => {
+    elem.insertAdjacentHTML('beforeend', selectString);
+  });
+
+  [...document.getElementsByClassName('automatemp__unitEconom__select')].forEach(elem => {
+    elem.addEventListener('change', e => {
+      var prodId;
+      waitForElm('#productNmId').then((elm) => {
+        prodId = document.getElementById('productNmId').innerText;
+        chrome.runtime.sendMessage({ command: 'logistic', article_id: prodId, warehouse_id: e.target.value }, (response) => { })
+        if (logistic){
+          waitForElm('.automatemp__logistic__table__tbody').then((elm)=>{
+            elm.parentNode.removeChild(elm);
+            let el1 = document.getElementsByClassName('automatemp__logistic__table');
+            elm.parentNode.insertAdjacentHTML('beforeend', `
+            <tbody class="automatemp__logistic__table__tbody">
+              <tr class="product-params__row">
+                <th class="product-params__cell">
+                  <span class="product-params__cell-decor">
+                    <span>Логистика</span>
+                  </span>
+                </th>
+                <td class="product-params__cell">
+                  <span>${logistic.logistic_amount} ₽</span>
+                </td>
+              </tr>
+              <tr class="product-params__row">
+                <th class="product-params__cell"> 
+                  <span class="product-params__cell-decor">
+                    <span>От клиента</span>
+                  </span>
+                </th>
+                <td class="product-params__cell">
+                  <span>${logistic.from_client} ₽</span>
+                </td>
+              </tr>
+              <tr class="product-params__row">
+                <th class="product-params__cell"> 
+                  <span class="product-params__cell-decor">
+                    <span>Хранение</span>
+                  </span>
+                </th>
+                <td class="product-params__cell">
+                  <span>${logistic.storage_amount} ₽ в день</span>
+                </td>
+              </tr>
+              <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                <th class="product-params__cell"> 
+                  <span class="product-params__cell-decor">
+                    <span>Приемка</span>
+                  </span>
+                </th>
+                <td class="product-params__cell">
+                  <span>${logistic.reception > 0 ? `x${logistic.reception}` : (logistic.reception = 0 ? 'бесплатно' : 'недоступно')}</span>
+                </td>
+              </tr>
+            </tbody>
+          `)
+          })
+          
+          
+        }
+      })
+    })
+  });
+})
 
 function ImgLinkSlice(nmId) {
   const nm = parseInt(nmId, 10),
@@ -362,13 +655,13 @@ function fillPromos(wheel) {
   if (wheel && cards.length > 10) {
     cards = [...document.getElementsByClassName('product-card__main j-card-link')].splice(cards.length - 10);
   }
-  if (promos.length != 0){
+  if (promos.length != 0) {
     promos.adverts.forEach(code => {
       var foundPromo = cards.find(card => { if (card.attributes[2].value.includes(`/${code.id}/`)) return true });
       if (foundPromo && !foundPromo.querySelector('.automatempBlock__promo__card')) {
         foundPromo.children[0].classList.add('automatempBlock__promo__card__img')
         let el = foundPromo.querySelector('.product-card__tip--promo')
-        el.innerHTML = `Промотовар - ${new Intl.NumberFormat('ru-RU').format(code.cpm) } ₽`;
+        el.innerHTML = `Промотовар - ${new Intl.NumberFormat('ru-RU').format(code.cpm)} ₽`;
       }
     })
   }
@@ -390,10 +683,12 @@ function clearData() {
     priorityCategoriesData.length = 0;
     let el = document.getElementById('automatempBlock');
     el.parentNode.removeChild(el);
-  } else if (currentUrl.includes('detail.aspx')){
+  } else if (currentUrl.includes('detail.aspx')) {
     cpmData.length = 0;
     let el = document.getElementById('automatempBlock__card__block');
     el.parentNode.removeChild(el);
+    let el1 = document.getElementById('automatempSertif');
+    el.parentNode.removeChild(el1);
   }
 }
 
