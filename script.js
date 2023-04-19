@@ -33,7 +33,7 @@ function getData() {
       prodId = document.getElementById('productNmId').innerText;
       chrome.runtime.sendMessage({ command: 'cardPromoBlock', id: prodId }, (response) => { })
       chrome.runtime.sendMessage({ command: 'unitEconom', id: prodId }, (response) => { })
-
+      chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => { })
     })
   }
 }
@@ -49,6 +49,7 @@ let size = [];
 let commissions = [];
 let wareHouses = [];
 let logistic = [];
+let certificate = [];
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
   if (request.msg) {
@@ -70,16 +71,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
         break;
       case 'getPromos':
         promos = request.promos;
-        console.log(promos);
         fillPromos(false);
         break;
       case 'getUnitEconom':
         size = request.size
         commissions = request.commissions
         wareHouses = request.wareHouses
-        console.log(size);
-        console.log(commissions);
-        console.log(wareHouses);
         if (size.length !== 0 && commissions.length !== 0 && wareHouses.length !== 0) {
           var prodId;
           waitForElm('#productNmId').then((elm) => {
@@ -89,8 +86,22 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
         }
       case 'getLogistic':
         logistic = request.logistic
-        console.log(logistic);
-        if (size && commissions && wareHouses && logistic) unitEconomFillPage();
+        if (size && commissions && wareHouses && logistic && !document.getElementById('autmatemp__unitEconom__block')) { unitEconomFillPage() } else {
+          rewriteLogistic();
+        }
+
+      case 'getCertificate':
+        waitForElm('.certificate-check__wrap').then((elm) => {
+          elm.parentNode.removeChild(elm)
+        })
+        certificate = request.certificate;
+        console.log(certificate);
+        if (certificate?.have_sertificate) {
+          fillCertificate();
+          console.log('Есть');
+        } else {
+          console.log('нет');
+        }
     }
   } else {
     if (request === 200) {
@@ -345,19 +356,19 @@ function fillCardPage() {
     })
 
     //btn-main -> btn-base
-    waitForElm('#options').then((elm) => {
-      elm.insertAdjacentHTML('beforeend', `
-        <div class="automatempSertif" id="automatempSertif">
-          <button class="btn-base">Заказать сертификацию</button>
-          <div class="automatempSertif__btn__img__block">
-            <button class="automatempSertif__mini__btn automatempSertif__info__btn">
-            </button>
-            <button class="automatempSertif__mini__btn">
-            </button>
-          </div>
-        </div>     
-      `)
-    })
+    // waitForElm('#options').then((elm) => {
+    //   elm.insertAdjacentHTML('beforeend', `
+    //     <div class="automatempSertif" id="automatempSertif">
+    //       <button class="btn-base">Заказать сертификацию</button>
+    //       <div class="automatempSertif__btn__img__block" id="automatempSertif__btn__img__block">
+            
+    //       </div>
+    //     </div>     
+    //   `)
+    // })
+
+
+
   }
 }
 
@@ -365,7 +376,7 @@ function unitEconomFillPage() {
   if (size.length !== 0 && commissions.length !== 0 && wareHouses.length !== 0 && logistic.length !== 0) {
     waitForElm('.product-page__details-section').then((elm) => {
       elm.insertAdjacentHTML('beforeend', `
-    <div class="autmatemp__unitEconom__block">
+    <div class="autmatemp__unitEconom__block" id="autmatemp__unitEconom__block">
       <h2 class="automatemp__unitEconom__title">Юнит экономика</h2>
 
       <div class="details-section__details details-section__details--about details">
@@ -463,7 +474,6 @@ function unitEconomFillPage() {
 
                 <h3 class="product-params__caption automatemp__unitEconom__table__title">Логистика, хранение и приёмка *</h3>
                 <select class="automatemp__unitEconom__select" id="#automatemp__unitEconom__select">
-                  <option disabled selected>Выберите склад</option></select>
 
                 </select>
                 <table class="product-params__table automatemp__logistic__table">
@@ -475,7 +485,7 @@ function unitEconomFillPage() {
                         </span>
                       </th>
                       <td class="product-params__cell">
-                        <span>${logistic.logistic_amount} ₽</span>
+                        <span id="automatemp__logistic__table__amount">${logistic.logistic_amount} ₽</span>
                       </td>
                     </tr>
                     <tr class="product-params__row">
@@ -485,7 +495,7 @@ function unitEconomFillPage() {
                         </span>
                       </th>
                       <td class="product-params__cell">
-                        <span>${logistic.from_client} ₽</span>
+                        <span id="automatemp__logistic__table__from_client">${logistic.from_client} ₽</span>
                       </td>
                     </tr>
                     <tr class="product-params__row">
@@ -495,7 +505,7 @@ function unitEconomFillPage() {
                         </span>
                       </th>
                       <td class="product-params__cell">
-                        <span>${logistic.storage_amount} ₽ в день</span>
+                        <span id="automatemp__logistic__table__storage_amount">${logistic.storage_amount} ₽ в день</span>
                       </td>
                     </tr>
                     <tr data-jsv="#395^#160_#161_" class="product-params__row">
@@ -505,7 +515,7 @@ function unitEconomFillPage() {
                         </span>
                       </th>
                       <td class="product-params__cell">
-                        <span>${logistic.reception > 0 ? `x${logistic.reception}` : (logistic.reception = 0 ? 'бесплатно' : 'недоступно')}</span>
+                        <span id="automatemp__logistic__table__reception">${logistic.reception > 0 ? `x${logistic.reception}` : logistic.reception === 0 ? 'бесплатно' : 'недоступно'}</span>
                       </td>
                     </tr>
                   </tbody>
@@ -519,7 +529,7 @@ function unitEconomFillPage() {
                 <button class="collapsible__toggle j-parameters-btn j-wba-card-item j-wba-card-item-show" id="automatemp__card__table__button"
                   data-name-for-wba="Item_Parameters_More"
                   data-link="text{:isCollapsed ? collapsedMsg : unCollapsedMsg}class{merge: !isCollapsed &amp;&amp; !unCollapsedMsg toggle=&quot;hide&quot;}{on toggleCollapse !isCollapsed}"
-                  type="button" data-jsv="#554^/554^">Развернуть характеристики</button>
+                  type="button" data-jsv="#554^/554^">Развернуть юнит экономику</button>
               </div>
             </div>
           </div>
@@ -529,93 +539,321 @@ function unitEconomFillPage() {
   `)
     })
   }
+  waitForElm('#automatemp__card__table__button').then((elm) => {
+    elm.addEventListener('click', function () {
+      let table = document.querySelector('#automatemp__collapsible__gradient');
+      if (table.classList.contains('hide')) {//Если блок открыт
+        table.classList.remove('hide')//Удаляем скрытие градиента
+        document.querySelector("#automatemp__collapsable").style.maxHeight = '224px';//Обрубаем блок по высоте
+        elm.textContent = 'Развернуть юнит экономику'
+      } else {
+        table.classList.add('hide')
+        document.querySelector("#automatemp__collapsable").style.maxHeight = 'none';//Раскрываем блок по высоте
+        elm.textContent = 'Свернуть юнит экономику'
+      }
+    });
+  })
+
+  waitForElm('.automatemp__unitEconom__select').then((elm) => {
+    var selectString = '';
+    wareHouses.forEach(item => {
+      selectString += `<option value="${item.id}">${item.name}</option>`;
+    });
+    [...document.getElementsByClassName('automatemp__unitEconom__select')].forEach(elem => {
+      elem.insertAdjacentHTML('beforeend', selectString);
+    });
+
+    [...document.getElementsByClassName('automatemp__unitEconom__select')].forEach(elem => {
+      elem.addEventListener('change', e => {
+        var prodId;
+        waitForElm('#productNmId').then((elm) => {
+          prodId = document.getElementById('productNmId').innerText;
+          chrome.runtime.sendMessage({ command: 'logistic', article_id: prodId, warehouse_id: e.target.value }, (response) => { })
+        })
+      })
+    });
+  })
 }
-waitForElm('#automatemp__card__table__button').then((elm) => {
-  elm.addEventListener('click', function () {
-    let table = document.querySelector('#automatemp__collapsible__gradient');
-    if (table.classList.contains('hide')) {//Если блок открыт
-      table.classList.remove('hide')//Удаляем скрытие градиента
-      document.querySelector("#automatemp__collapsable").style.maxHeight = '224px';//Обрубаем блок по высоте
-      elm.textContent = 'Развернуть юнит экономику'
-    } else {
-      table.classList.add('hide')
-      document.querySelector("#automatemp__collapsable").style.maxHeight = 'none';//Раскрываем блок по высоте
-      elm.textContent = 'Свернуть юнит экономику'
-    }
-  });
-})
 
-waitForElm('.automatemp__unitEconom__select').then((elm) => {
-  var selectString = '';
-  wareHouses.forEach(item => {
-    selectString += `<option value="${item.id}">${item.name}</option>`;
-  });
-  [...document.getElementsByClassName('automatemp__unitEconom__select')].forEach(elem => {
-    elem.insertAdjacentHTML('beforeend', selectString);
-  });
+function rewriteLogistic() {
+  waitForElm('.automatemp__logistic__table').then((elm) => {
+    document.getElementById('automatemp__logistic__table__amount').innerHTML = `${logistic.logistic_amount} ₽`
+    document.getElementById('automatemp__logistic__table__from_client').innerHTML = `${logistic.from_client} ₽`
+    document.getElementById('automatemp__logistic__table__storage_amount').innerHTML = `${logistic.storage_amount} ₽ в день`
+    document.getElementById('automatemp__logistic__table__reception').innerHTML = `${logistic.reception > 0 ? `x${logistic.reception}` : logistic.reception === 0 ? 'бесплатно' : 'недоступно'}`
+  })
+}
 
-  [...document.getElementsByClassName('automatemp__unitEconom__select')].forEach(elem => {
-    elem.addEventListener('change', e => {
-      var prodId;
-      waitForElm('#productNmId').then((elm) => {
-        prodId = document.getElementById('productNmId').innerText;
-        chrome.runtime.sendMessage({ command: 'logistic', article_id: prodId, warehouse_id: e.target.value }, (response) => { })
-        if (logistic){
-          waitForElm('.automatemp__logistic__table__tbody').then((elm)=>{
-            elm.parentNode.removeChild(elm);
-            let el1 = document.getElementsByClassName('automatemp__logistic__table');
-            elm.parentNode.insertAdjacentHTML('beforeend', `
-            <tbody class="automatemp__logistic__table__tbody">
-              <tr class="product-params__row">
-                <th class="product-params__cell">
-                  <span class="product-params__cell-decor">
-                    <span>Логистика</span>
-                  </span>
-                </th>
-                <td class="product-params__cell">
-                  <span>${logistic.logistic_amount} ₽</span>
-                </td>
-              </tr>
-              <tr class="product-params__row">
-                <th class="product-params__cell"> 
-                  <span class="product-params__cell-decor">
-                    <span>От клиента</span>
-                  </span>
-                </th>
-                <td class="product-params__cell">
-                  <span>${logistic.from_client} ₽</span>
-                </td>
-              </tr>
-              <tr class="product-params__row">
-                <th class="product-params__cell"> 
-                  <span class="product-params__cell-decor">
-                    <span>Хранение</span>
-                  </span>
-                </th>
-                <td class="product-params__cell">
-                  <span>${logistic.storage_amount} ₽ в день</span>
-                </td>
-              </tr>
-              <tr data-jsv="#395^#160_#161_" class="product-params__row">
-                <th class="product-params__cell"> 
-                  <span class="product-params__cell-decor">
-                    <span>Приемка</span>
-                  </span>
-                </th>
-                <td class="product-params__cell">
-                  <span>${logistic.reception > 0 ? `x${logistic.reception}` : (logistic.reception = 0 ? 'бесплатно' : 'недоступно')}</span>
-                </td>
-              </tr>
-            </tbody>
-          `)
-          })
+// function fillCertificate() {
+//   waitForElm(`.certificate-check`).then((elm) => {
+//     if (!elm.classList.contains('hide')) {
+//       waitForElm('#automatempSertif__btn__img__block').then((elm1) => {
+//         elm1.insertAdjacentHTML('beforeend', `
+//           <button class="automatempSertif__mini__btn automatempSertif__info__btn" id="automatempSertif__info__btn">
+//             </button>
+//         `)
+//         elm1.insertAdjacentHTML('beforeend', `
+//           <a class="automatempSertif__mini__btn" href="" target="_blank">
+//           </a> 
+//         `)
+
+//         if (document.getElementsByClassName('automatemp-modalCert').length === 0) {
+//           document.getElementsByTagName('body')[0].insertAdjacentHTML('AfterBegin',
+//             `<div id="automatemp-modalCert" class="automatemp-modalCert">
+//             <div class="automatemp-modalCert_content">
+//               <span id="automatemp_CertClose">&times;</span>
+//               <div class="details-section__details details-section__details--about details automatemp-modalCert--content ">    
+//                 <div class="automatemp-modalCert--title">Проверка сертификата / декларации</div>
+//                 <table class="product-params__table ">
+//                   <tbody class="automatemp__certificate__tbody">
+//                   </tbody>
+//                 </table>
+//               </div>
+                      
+//             </div>
+//           </div>`);
           
-          
+
+//         }
+//         waitForElm('#automatempSertif__info__btn').then((elm1) => {
+//           console.log('find');
+//           elm1.addEventListener('click', function () {
+//             console.log('click');
+//             // document.getElementsByClassName('automatemp-modalCert--content')[0].innerHTML = '';
+//             modalVisible();
+//             // document.getElementsByClassName('automatemp-modalCert--content')[0].insertAdjacentHTML('afterbegin', '<span class="loaderCert-automatemp" style="display:block;"></span>');
+//             // document.querySelector('.loaderCert-automatemp').style.display = 'none';
+//             let content = document.querySelector('.automatemp-modalCert--content');
+//             if (!certificate.results.applicant || certificate.results.applicant === '') content.innerText = 'Нет данных';
+//             var result = [];
+//             for (const property in certificate.results) {
+//               result.push({ property: property, value: certificate.results[property] })
+//             }
+//             result.forEach(item => {
+//               var name;
+//               switch (item.property) {
+//                 case 'decl_number':
+//                   name = 'Номер декларации';
+//                   break;
+//                 case 'declRegDate':
+//                   name = 'Дата регистрации декларации';
+//                   break;
+//                 case 'declEndDate':
+//                   name = 'Дата окончания декларации';
+//                   break;
+//                 case 'fullName':
+//                   name = 'Полное наименование';
+//                   break;
+//                 case 'applicant':
+//                   name = 'Заявитель';
+//                   break;
+//                 case 'applicant_ogrn':
+//                   name = 'ОГРН заявителя';
+//                   break;
+//                 case 'applicant_inn':
+//                   name = 'ИНН заявителя';
+//                   break;
+//                 case 'applicant_email':
+//                   name = 'Email заявителя';
+//                   break;
+//                 case 'applicant_phone':
+//                   name = 'Телефон заявителя';
+//                   break;
+//                 case 'applicant_address':
+//                   name = 'Адрес заявителя';
+//                   break;
+//                 case 'manufacturer':
+//                   name = 'Изготовитель';
+//                   break;
+//                 case 'manufacturer_address':
+//                   name = 'Адрес изготовителя';
+//                   break;
+//                 case 'testing_number':
+//                   name = 'Номер тестирования';
+//                   break;
+//                 case 'testing_lab_name':
+//                   name = 'Лаборатория тестирования';
+//                   break;
+//                 case 'testing_lab_address':
+//                   name = 'Адрес лаборатории тестирования';
+//                   break;
+//                 case 'protocol_date':
+//                   name = 'Дата протокола';
+//                   break;
+//                 case 'protocol_number':
+//                   name = 'Номер протокола';
+//                   break;
+//                 case 'basis':
+//                   name = 'Основание';
+//                   break;
+//               }
+//               console.log(name, ' - ', item.value);
+
+//               if (item.value === null || item.value === 'null' || item.value === '') item.value = 'нет данных';
+//               waitForElm('.automatemp__certificate__tbody').then((elm3) => {
+//                 elm3.insertAdjacentHTML('beforeend', `
+//                 <tr data-jsv="#395^#160_#161_" class="product-params__row">
+//                   <th class="product-params__cell">
+//                     <span class="product-params__cell-decor">
+//                       <span>${name}</span>
+//                     </span>
+//                   </th>
+//                   <td class="product-params__cell">
+//                     <span>${item.value}</span>
+//                   </td>
+//                 </tr>
+//               `)
+//               })
+
+//             })
+//             document.getElementById('automatemp_CertClose').addEventListener('click', function () {
+//               modalOut();
+//             })
+//           })
+//         })
+//       })
+
+      
+
+
+
+//       waitForElm('#automatempSertif__info__btn').then((elm1) => {
+
+//       })
+//     }
+//   })
+// }
+
+
+
+// waitForElm('.certificate-check').then((elm)=>{
+//   if (!elm.classList.contains('hide')){
+//     fillCertificate()
+//   }else{
+//     waitForElm('.automatempSertif').then((elm1)=>{
+//       elm1.parentNode.removeChild(elm1)
+//     })
+//   }
+// })
+
+function fillCertificate(){
+  if (document.querySelectorAll('#automatempSertif__info__btn').length === 0) document.querySelector('#options').insertAdjacentHTML('beforeend', `
+    <div class="automatempSertif" id="automatempSertif">
+      <button class="btn-base">Заказать сертификацию</button>
+      <div class="automatempSertif__btn__img__block" id="automatempSertif__btn__img__block">
+        <button class="automatempSertif__mini__btn automatempSertif__info__btn" id="automatempSertif__info__btn">
+        </button>
+        <a class="automatempSertif__mini__btn" href="" target="_blank">
+        </a> 
+      </div>
+    </div>       
+  
+  `);
+  if (document.getElementsByClassName('automatemp-modalCert').length === 0) {
+    document.getElementsByTagName('body')[0].insertAdjacentHTML('AfterBegin',
+      `<div id="automatemp-modalCert" class="automatemp-modalCert">
+      <div class="automatemp-modalCert_content">
+        <span id="automatemp_CertClose">&times;</span>
+        <a class="automatempBlock__logo__link" href="https://automate-mp.ru/">
+          <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
+          <img class="automatempBlock__logo2" src="https://static.tildacdn.com/tild3436-3731-4466-b732-646465616236/1401a47a-25ef-4d45-b.svg"/>
+        </a>
+        <div class="automatemp-modalCert--title">Проверка сертификата / декларации</div>
+        <ul class="automatemp-modalCert--content"></ul>
+      </div>
+    </div>`);
+    document.getElementById('automatempSertif__info__btn').addEventListener('click', function () {
+      document.getElementsByClassName('automatemp-modalCert--content')[0].innerHTML = '';
+      modalVisible();
+      document.getElementsByClassName('automatemp-modalCert--content')[0].insertAdjacentHTML('afterbegin', '<span class="loaderCert-automatemp" style="display:block;"></span>');
+      let prodId = document.getElementById('productNmId').innerText;
+      chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => {})
+      if (certificate.length !== 0){
+        document.querySelector('.loaderCert-automatemp').style.display = 'none';
+        var content = document.querySelector('.automatemp-modalCert--content');
+        if (!certificate.results.applicant || certificate.results.applicant === '') content.innerText = 'Нет данных';
+        var result = [];
+        for (const property in certificate.results) {
+          result.push({ property: property, value: certificate.results[property] })
         }
+        result.forEach(item => {
+          var name;
+          switch (item.property) {
+            case 'decl_number':
+              name = 'Номер декларации';
+              break;
+            case 'declRegDate':
+              name = 'Дата регистрации декларации';
+              break;
+            case 'declEndDate':
+              name = 'Дата окончания декларации';
+              break;
+            case 'fullName':
+              name = 'Полное наименование';
+              break;
+            case 'applicant':
+              name = 'Заявитель';
+              break;
+            case 'applicant_ogrn':
+              name = 'ОГРН заявителя';
+              break;
+            case 'applicant_inn':
+              name = 'ИНН заявителя';
+              break;
+            case 'applicant_email':
+              name = 'Email заявителя';
+              break;
+            case 'applicant_phone':
+              name = 'Телефон заявителя';
+              break;
+            case 'applicant_address':
+              name = 'Адрес заявителя';
+              break;
+            case 'manufacturer':
+              name = 'Изготовитель';
+              break;
+            case 'manufacturer_address':
+              name = 'Адрес изготовителя';
+              break;
+            case 'testing_number':
+              name = 'Номер тестирования';
+              break;
+            case 'testing_lab_name':
+              name = 'Лаборатория тестирования';
+              break;
+            case 'testing_lab_address':
+              name = 'Адрес лаборатории тестирования';
+              break;
+            case 'protocol_date':
+              name = 'Дата протокола';
+              break;
+            case 'protocol_number':
+              name = 'Номер протокола';
+              break;
+            case 'basis':
+              name = 'Основание';
+              break;
+          }
+          if (item.value === null || item.value === 'null' || item.value === '') item.value = 'нет данных';
+          content.insertAdjacentHTML('beforeend', `<li><span class="text">${name}</span><span class="page">${item.value}</span></li>`)
+        })
+      }
+        
+      document.getElementById('automatemp_CertClose').addEventListener('click', function () {
+        modalOut();
       })
     })
-  });
-})
+  }
+}
+
+function modalVisible() {
+  document.getElementById('automatemp-modalCert').style.display = 'block';
+}
+
+function modalOut() {
+  document.getElementById('automatemp-modalCert').style.display = 'none';
+}
+
 
 function ImgLinkSlice(nmId) {
   const nm = parseInt(nmId, 10),
@@ -670,7 +908,6 @@ function fillPromos(wheel) {
 document.body.addEventListener('wheel', (event) => {
   event.wheelDeltaY < 0 ? fillPromos(true) : null;
 })
-
 function clearData() {
   currentUrl = window.location.href;
   if (
@@ -680,7 +917,12 @@ function clearData() {
     jsonSearchData.length = 0;
     jsonSearchSpecificData.length = 0;
     tableCardsData.length = 0;
+    commissions.length = 0;
+    wareHouses.length = 0;
+    size.length = 0;
     priorityCategoriesData.length = 0;
+    logistic.length = 0
+    certificate.length = 0
     let el = document.getElementById('automatempBlock');
     el.parentNode.removeChild(el);
   } else if (currentUrl.includes('detail.aspx')) {
@@ -688,7 +930,11 @@ function clearData() {
     let el = document.getElementById('automatempBlock__card__block');
     el.parentNode.removeChild(el);
     let el1 = document.getElementById('automatempSertif');
-    el.parentNode.removeChild(el1);
+    el1.parentNode.removeChild(el1);
+    let el2 = document.getElementById('autmatemp__unitEconom__block');
+    el2.parentNode.removeChild(el2);  
+
+    
   }
 }
 

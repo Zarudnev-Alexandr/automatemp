@@ -18,7 +18,8 @@
       "matches": [
         "*://*.wildberries.ru/*",
         "*://*.wb.ru/*",
-        "*://*.wbcon.ru/*"
+        "*://*.wbcon.ru/*",
+        "*://62.109.3.23/*"
       ],
       "js": [
         "script.js"

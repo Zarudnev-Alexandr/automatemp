@@ -154,15 +154,40 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       if (arr11.length !== 0) {
         chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
           chrome.tabs.sendMessage(tabs[0].id, { logistic: arr11, msg: 'getLogistic' });
-          console.log(arr11);
         })
-      }else{
+      } else {
         setTimeout(fetchLogistic, 10);
+      }
+    }
+  }
+
+  else if (message.command === 'certificate') {
+    let arr12 = [];
+    fetch('http://62.109.3.23:255/put/',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          article_url: `https://www.wildberries.ru/catalog/${message.id}/detail.aspx` })
+      }).then(response => response.ok ? response.text() : null)
+      .then(response => {
+        arr12 = response ? JSON.parse(response) : null;
+      })
+
+    fetchCertificate()
+    function fetchCertificate() {
+      if (arr12.length !== 0) {
+        console.log(arr12);
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+          chrome.tabs.sendMessage(tabs[0].id, { certificate: arr12, msg: 'getCertificate' });
+        })
+      } else {
+        setTimeout(fetchCertificate, 10)
       }
     }
   }
   return true;
 });
+
 
 async function sendRequest(url) {
   await fetch(url)
