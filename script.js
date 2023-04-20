@@ -35,9 +35,9 @@ function getData() {
       chrome.runtime.sendMessage({ command: 'unitEconom', id: prodId }, (response) => { })
       // chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => { })
     })
-    
+
     waitForElm(`.certificate-check`).then((elm) => {
-      console.log(elm);  
+      console.log(elm);
       if (!elm.classList.contains('hide')) {
         console.log("Нашли");
         waitForElm('#automatempSertif').then((elm1) => {
@@ -45,9 +45,9 @@ function getData() {
         })
         fillCertificate();
       }
-      else{
+      else {
         console.log('Не подходит');
-        waitForElm('#automatempSertif').then((elm1)=>{
+        waitForElm('#automatempSertif').then((elm1) => {
           elm1.style.display = 'none'
         })
       }
@@ -109,19 +109,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
         if (size && commissions && wareHouses && logistic && !document.getElementById('autmatemp__unitEconom__block')) { unitEconomFillPage() } else {
           rewriteLogistic();
         }
-
-      // case 'getCertificate':
-        // waitForElm('.certificate-check__wrap').then((elm) => {
-        //   elm.parentNode.removeChild(elm)
-        // })
-      //   certificate = request.certificate;
-      //   console.log(certificate);
-        // if (certificate?.have_sertificate) {
-        //   fillCertificate();
-        //   console.log('Есть');
-        // } else {
-        //   console.log('нет');
-        // }
     }
   } else {
     if (request === 200) {
@@ -381,7 +368,7 @@ function fillCardPage() {
     //     <div class="automatempSertif" id="automatempSertif">
     //       <button class="btn-base">Заказать сертификацию</button>
     //       <div class="automatempSertif__btn__img__block" id="automatempSertif__btn__img__block">
-            
+
     //       </div>
     //     </div>     
     //   `)
@@ -604,14 +591,14 @@ function rewriteLogistic() {
   })
 }
 
-function fillCertificate(){
+function fillCertificate() {
   if (document.querySelectorAll('#automatempSertif').length === 0) document.querySelector('.certificate-check').insertAdjacentHTML('beforeend', `
     <div class="automatempSertif" id="automatempSertif">
       <button class="btn-base">Заказать сертификацию</button>
       <div class="automatempSertif__btn__img__block" id="automatempSertif__btn__img__block">
         <button class="automatempSertif__mini__btn automatempSertif__info__btn" id="automatempSertif__info__btn">
         </button>
-        <a class="automatempSertif__mini__btn" href="" target="_blank">
+        <a class="automatempSertif__mini__btn automatempSertif__rosgossert__btn" href="" target="_blank">
         </a> 
       </div>
     </div>       
@@ -637,7 +624,7 @@ function fillCertificate(){
       let prodId = document.getElementById('productNmId').innerText;
       chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => {
         console.log(response);
-        if (response.have_sertificate == null){
+        if (response.have_sertificate == null) {
           document.getElementById('automatempSertif').style.display = 'none'
           document.getElementById('automatemp-modalCert').style.display = 'none'
           console.log('сорян');
@@ -713,10 +700,20 @@ function fillCertificate(){
           })
         }
       })
+
       
-        
+
+
       document.getElementById('automatemp_CertClose').addEventListener('click', function () {
         modalOut();
+      })
+    })
+    
+    let prodId = document.getElementById('productNmId').innerText;
+    chrome.runtime.sendMessage({ command: 'rosgoscert', id: prodId }, (response) => {
+      console.log(response);
+      waitForElm('.automatempSertif__rosgossert__btn').then((elm2)=>{
+        elm2.href = response
       })
     })
   }
@@ -805,11 +802,9 @@ function clearData() {
     cpmData.length = 0;
     let el = document.getElementById('automatempBlock__card__block');
     el.parentNode.removeChild(el);
-    // let el1 = document.getElementById('automatempSertif');
-    // el1.parentNode.removeChild(el1);
     let el2 = document.getElementById('autmatemp__unitEconom__block');
-    el2.parentNode.removeChild(el2);  
-    
+    el2.parentNode.removeChild(el2);
+
   }
 }
 

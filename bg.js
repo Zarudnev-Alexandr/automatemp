@@ -165,30 +165,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     checkCert(message.id).then(response => {
       sendResponse(response)
     })
-    // let arr12 = [];
-    // fetch('http://62.109.3.23:255/put/',
-    //   {
-    //     method: 'POST',
-    //     body: JSON.stringify({
-    //       article_url: `https://www.wildberries.ru/catalog/${message.id}/detail.aspx`
-    //     })
-    //   }).then(response => response.ok ? response.text() : null)
-    //   .then(response => {
-    //     arr12 = response ? JSON.parse(response) : null;
-    //   })
-    // return arr12;
+  }
 
-    // fetchCertificate()
-    // function fetchCertificate() {
-    //   if (arr12.length !== 0) {
-    //     console.log(arr12);
-    //     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    //       chrome.tabs.sendMessage(tabs[0].id, { certificate: arr12, msg: 'getCertificate' });
-    //     })
-    //   } else {
-    //     setTimeout(fetchCertificate, 10)
-    //   }
-    // }
+  else if (message.command === 'rosgoscert'){
+    rosGosCert(message.id).then(response => {
+      sendResponse(response)
+    })
   }
   return true;
 });
@@ -199,6 +181,18 @@ async function checkCert(id) {
     {
       method: 'POST',
       body: JSON.stringify({ article_url: `https://www.wildberries.ru/catalog/${id}/detail.aspx` })
+    }).then(response => response.ok ? response.text() : null)
+    .then(response => {
+      data = response ? JSON.parse(response) : null;
+    })
+  return data;
+}
+
+async function rosGosCert(id) {
+  var data;
+  await fetch(`https://4947.ru/wb_extension/api/certificate/${id}`,
+    {
+      method: 'GET',
     }).then(response => response.ok ? response.text() : null)
     .then(response => {
       data = response ? JSON.parse(response) : null;
