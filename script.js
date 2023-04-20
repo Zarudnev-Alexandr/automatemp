@@ -35,11 +35,9 @@ function getData() {
       chrome.runtime.sendMessage({ command: 'unitEconom', id: prodId }, (response) => { })
       // chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => { })
     })
-    waitForElm('.certificate-check__wrap').then((elm) => {
-      elm.style.display = 'none'
-    })
+    
     waitForElm(`.certificate-check`).then((elm) => {
-      // console.log(elm);  
+      console.log(elm);  
       if (!elm.classList.contains('hide')) {
         console.log("Нашли");
         waitForElm('#automatempSertif').then((elm1) => {
@@ -53,6 +51,9 @@ function getData() {
           elm1.style.display = 'none'
         })
       }
+    })
+    waitForElm('.certificate-check__wrap').then((elm) => {
+      elm.style.display = 'none'
     })
   }
 }
@@ -604,7 +605,7 @@ function rewriteLogistic() {
 }
 
 function fillCertificate(){
-  if (document.querySelectorAll('#automatempSertif').length === 0) document.querySelector('#options').insertAdjacentHTML('beforeend', `
+  if (document.querySelectorAll('#automatempSertif').length === 0) document.querySelector('.certificate-check').insertAdjacentHTML('beforeend', `
     <div class="automatempSertif" id="automatempSertif">
       <button class="btn-base">Заказать сертификацию</button>
       <div class="automatempSertif__btn__img__block" id="automatempSertif__btn__img__block">
