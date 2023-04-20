@@ -162,32 +162,49 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
 
   else if (message.command === 'certificate') {
-    let arr12 = [];
-    fetch('http://62.109.3.23:255/put/',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          article_url: `https://www.wildberries.ru/catalog/${message.id}/detail.aspx` })
-      }).then(response => response.ok ? response.text() : null)
-      .then(response => {
-        arr12 = response ? JSON.parse(response) : null;
-      })
+    checkCert(message.id).then(response => {
+      sendResponse(response)
+    })
+    // let arr12 = [];
+    // fetch('http://62.109.3.23:255/put/',
+    //   {
+    //     method: 'POST',
+    //     body: JSON.stringify({
+    //       article_url: `https://www.wildberries.ru/catalog/${message.id}/detail.aspx`
+    //     })
+    //   }).then(response => response.ok ? response.text() : null)
+    //   .then(response => {
+    //     arr12 = response ? JSON.parse(response) : null;
+    //   })
+    // return arr12;
 
-    fetchCertificate()
-    function fetchCertificate() {
-      if (arr12.length !== 0) {
-        console.log(arr12);
-        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-          chrome.tabs.sendMessage(tabs[0].id, { certificate: arr12, msg: 'getCertificate' });
-        })
-      } else {
-        setTimeout(fetchCertificate, 10)
-      }
-    }
+    // fetchCertificate()
+    // function fetchCertificate() {
+    //   if (arr12.length !== 0) {
+    //     console.log(arr12);
+    //     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    //       chrome.tabs.sendMessage(tabs[0].id, { certificate: arr12, msg: 'getCertificate' });
+    //     })
+    //   } else {
+    //     setTimeout(fetchCertificate, 10)
+    //   }
+    // }
   }
   return true;
 });
 
+async function checkCert(id) {
+  var data;
+  await fetch('http://62.109.3.23:255/put/',
+    {
+      method: 'POST',
+      body: JSON.stringify({ article_url: `https://www.wildberries.ru/catalog/${id}/detail.aspx` })
+    }).then(response => response.ok ? response.text() : null)
+    .then(response => {
+      data = response ? JSON.parse(response) : null;
+    })
+  return data;
+}
 
 async function sendRequest(url) {
   await fetch(url)
