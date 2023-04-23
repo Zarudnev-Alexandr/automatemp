@@ -1,6 +1,6 @@
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.command === 'checkEnable') {
-    check('https://wbcon.ru/wp-content/uploads/2022/11/29999.png')
+    check('https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg')
   }
   if (message.command === 'getRequests') {
     let arr1 = []

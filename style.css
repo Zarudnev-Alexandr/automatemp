@@ -469,6 +469,7 @@
 
 .autmatemp__unitEconom__block {
   order: 4;
+  width: 100%;
 }
 
 .automatemp__unitEconom__title {
@@ -486,7 +487,7 @@
 }
 
 .automatemp__unitEconom__select {
-  width: auto;
+  width: 220px;
   padding: 9px 110px 9px 10px;
   font-style: normal;
   font-weight: 400;
