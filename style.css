@@ -49,16 +49,11 @@
   transition: all .3s;
 }
 
-/* .automatempBlock__secondinner {
-  display: flex;
-  justify-content: center;
-} */
-
 .automatempBlock__items {
   width: 100%;
   padding: 0 15px 0 0;
   display: grid;
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: repeat(5, 250px);
   grid-column-gap: 20px;
   grid-row-gap: 14px;
   margin-bottom: 15px;
@@ -66,7 +61,6 @@
 }
 
 .automatempBlock__item {
-  /* max-width: 250px; */
   width: 250px;
 }
 
@@ -109,6 +103,11 @@
 .automatempBlock__item__label {
   font-weight: 500;
   color: #77767D;
+  white-space: nowrap;
+  max-width: 150px;
+  overflow: hidden;
+  padding-right: 5px;
+  text-overflow: ellipsis;
 }
 
 .automatempBlock__item__addition {
@@ -145,12 +144,6 @@
 }
 
 .automatempBlock__wholeAuction {
-  /* font-weight: 500;
-  font-size: 11px;
-  line-height: 13px;
-  color: #8B8B8B;
-  border-bottom: 0.5px dashed #8B8B8B;
-  margin-bottom: 13px; */
   border-bottom: 1px dashed;
   font-size: 16px;
   line-height: 22px;
@@ -165,7 +158,6 @@
 }
 
 .categoryPriority {
-  /* border: 1px dashed #242424; */
   border-radius: 10px;
 }
 
@@ -186,8 +178,8 @@
   border-collapse: separate;
   border-spacing: 0 5px;
   text-align: left;
-  overflow-x: auto;
-  /* min-width: 950px; */
+  width: 100%;
+  overflow: auto;
 }
 
 .categoryPriority__wrapper1 {
@@ -223,7 +215,11 @@
 
 .categoryPriority__tbody__td {
   padding: 15px 0 16px;
-  min-width: 90px;
+  min-width: 150px;
+  max-width: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding-right: 10px;
 }
 
 .categoryPriority__deliveryTime__box {
@@ -256,6 +252,11 @@
 
 .categoryPriority__deliveryTime__item+.categoryPriority__deliveryTime__item {
   margin-top: 26px;
+}
+
+.categoryPriority__wrapper2 {
+  overflow: auto;
+  position: relative;
 }
 
 .categoryPriority__wrapper2__topbox {
@@ -356,7 +357,15 @@
 }
 
 .categoryPriority__table2 {
-  width: 100%;
+  width: auto;
+  padding-right: 5px;
+  display: inline-block;
+  vertical-align: top;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  max-height: 700px;
 }
 
 .categoryPriority__tbody__td__withimg {
@@ -468,6 +477,7 @@
 }
 
 .autmatemp__unitEconom__block {
+  margin-top: 80px;
   order: 4;
   width: 100%;
 }
@@ -493,9 +503,10 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 15px;
-  color: #8C8C9A;
+  color: #000;
+  font-weight: 500;
   border: 1px solid #D1CFD6;
-  border-radius: 3px;
+  border-radius: 8px;
   cursor: pointer;
   display: block;
   margin-bottom: -15px;
@@ -538,24 +549,22 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: rgba(0, 0, 0, 0.8);
-  /* font-size: 26px;
-  font-family: Calibri;
-  font-weight: lighter; */
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .automatemp-modalCert_content {
   background-color: #fefefe;
   margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #888;
-  max-width: 644px;
-  border-radius: 10px;
+  padding: 30px 40px;
+  max-width: 700px;
+  border-radius: 35px;
   position: relative;
-  top: 30px;
+  top: 50%;
+  transform: translateY(-50%);
   overflow: auto;
-  /* text-align: center; */
   height: 700px;
+  display: flex;
+  flex-direction: column;
 }
 
 #automatemp_CertClose {
@@ -563,19 +572,27 @@
   top: 5px;
   right: 10px;
   cursor: pointer;
-  /* border: 1px solid black; */
-  /* border-radius: 50%; */
   height: 35px;
   width: 35px;
   font-size: 35px;
-  /* background-color: #000; */
+  color: rgb(140, 140, 154);
+}
+
+.automatemp-modalCert--content .loaderCert-automatemp {
+  position: absolute;
+  top: 45%;
+  left: 4%;
+}
+
+.automatemp-modalCert__title__box {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
 .automatemp-modalCert--title {
   font-weight: 700;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  margin-bottom: 20px;
+  margin-left: 20px;
 }
 
 ul.automatemp-modalCert--content li {
@@ -612,4 +629,75 @@ ul.automatemp-modalCert--content li:after {
   overflow: hidden;
   height: 1em;
   border-bottom: 1px dashed #D7D8DF;
+}
+
+.automatemp-modalCert__btn-base {
+  margin-top: 40px;
+  max-width: 235px;
+  position: absolute !important;
+  left: 40px;
+}
+
+.automatemp__feedbacks-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.automatemp__feedbacks-btn__link-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.automatemp__feedbacks-btn__link-box__logo-box {
+  max-width: 34px;
+  margin-right: 17px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.automatemp__feedbacks-btn__link-box__title-box {
+  max-width: 151px;
+}
+
+.automatemp__feedbacks-btn__link-box__descr {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 13px;
+
+  color: #000000;
+}
+
+.automatemp__feedbacks-calc {
+  margin-top: 70px;
+}
+
+.automatemp__feedbacks-calc__title {
+  font-size: 24px;
+}
+
+.automatemp__feedbacks-calc__title {
+  margin-bottom: 30px;
+}
+
+.automatemp__feedbacks-calc__ratebox-items{
+  margin-bottom: 40px;
+}
+
+.automatemp__feedbacks-calc__ratebox-item {
+  display: grid;
+  grid-template-columns: 130px auto;
+  align-items: center;
+}
+
+.automatemp__feedbacks-calc__ratebox-item__rating{
+  font-size: 16px;
+  margin-left: 22px;
+}
+
+.automatemp__feedbacks-calc__ratebox-item__ratingCount{
+  font-size: 16px;
+  font-weight: 400;
+  color: #868695;
 }

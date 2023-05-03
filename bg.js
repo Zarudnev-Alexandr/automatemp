@@ -167,10 +167,30 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     })
   }
 
-  else if (message.command === 'rosgoscert'){
+  else if (message.command === 'rosgoscert') {
     rosGosCert(message.id).then(response => {
       sendResponse(response)
     })
+  }
+
+  else if (message.command === 'feedbacks') {
+    let arr12 = [];
+    fetch(`https://4947.ru/wb_extension/api/rating_calculator/${message.id}`)
+      .then(response => response.json())
+      .then((data) => {
+        arr12 = data;
+      });
+
+    fetchFeedbacks()
+    function fetchFeedbacks() {
+      if (arr12.length !== 0) {
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+          chrome.tabs.sendMessage(tabs[0].id, { feedbacks: arr12, msg: 'getFeedbacks' });
+        })
+      }else{
+        setTimeout(fetchFeedbacks, 10);
+      }
+    }
   }
   return true;
 });

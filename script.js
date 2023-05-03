@@ -33,28 +33,25 @@ function getData() {
       prodId = document.getElementById('productNmId').innerText;
       chrome.runtime.sendMessage({ command: 'cardPromoBlock', id: prodId }, (response) => { })
       chrome.runtime.sendMessage({ command: 'unitEconom', id: prodId }, (response) => { })
-      // chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => { })
     })
 
     waitForElm(`.certificate-check`).then((elm) => {
       console.log(elm);
-      if (!elm.classList.contains('hide')) {
-        console.log("Нашли");
-        waitForElm('#automatempSertif').then((elm1) => {
-          elm1.style.display = 'flex'
-        })
-        fillCertificate();
+
+      var items = document.getElementsByClassName('certificate-check__wrap');
+      for (let i = 0; i < items.length; i++) {
+        let element = items[i];
+        element.style.display = 'none';
+        element.style.display = 'none';
       }
-      else {
-        console.log('Не подходит');
-        waitForElm('#automatempSertif').then((elm1) => {
-          elm1.style.display = 'none'
-        })
-      }
+      waitForElm('#automatempSertif').then((elm1) => {
+        elm1.style.display = 'flex'
+      })
+      fillCertificate();
     })
-    waitForElm('.certificate-check__wrap').then((elm) => {
-      elm.style.display = 'none'
-    })
+  } else if (currentUrl.includes('wildberries.ru/catalog') && currentUrl.includes('feedbacks')) {//Отзывы
+    let prodId = currentUrl.split('/')[4]
+    chrome.runtime.sendMessage({ command: 'feedbacks', id: prodId });
   }
 }
 
@@ -70,6 +67,7 @@ let commissions = [];
 let wareHouses = [];
 let logistic = [];
 let certificate = [];
+let feedbacks = [];
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
   if (request.msg) {
@@ -108,6 +106,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
         logistic = request.logistic
         if (size && commissions && wareHouses && logistic && !document.getElementById('autmatemp__unitEconom__block')) { unitEconomFillPage() } else {
           rewriteLogistic();
+        }
+      case 'getFeedbacks':
+        feedbacks = request.feedbacks
+        if (feedbacks.length != 0) {
+          fillFeedbacks();
         }
     }
   } else {
@@ -148,6 +151,10 @@ function waitForElm(selector) {
   });
 }
 
+function declOfNum(number, words) {
+  return words[(number % 100 > 4 && number % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(number % 10 < 5) ? Math.abs(number) % 10 : 5]];
+}
+
 function fillPage() {
   if (jsonSearchData.length != 0 && jsonSearchSpecificData.length != 0 && tableCardsData.length != 0 && priorityCategoriesData.length != 0 && timeInfoData.length != 0) {
     waitForElm('.catalog-page__searching-results').then((elm) => {
@@ -167,13 +174,19 @@ function fillPage() {
 
           <div class="automatempBlock__items" id="automatempBlock__items">
           </div>
-          <button class="automatempBlock__wholeAuction" id="wholeAuction__id">Весь аукцион</button>
+          <button class="automatempBlock__wholeAuction" id="wholeAuction__id">Показать аукцион</button>
         </div>
       `
       );
       // Скрытие и показ основного блока
       document.querySelector('#wholeAuction__id').addEventListener('click', function () {
         document.querySelector('#categoryPriorityId').classList.toggle('hide');
+        console.log(document.querySelector('#categoryPriorityId'));
+        if (document.querySelector('#categoryPriorityId').classList.contains('hide')) {
+          document.querySelector('#wholeAuction__id').textContent = 'Показать ауцкцион'
+        } else {
+          document.querySelector('#wholeAuction__id').textContent = 'Скрыть ауцкцион'
+        }
       });
 
       waitForElm('#automatempBlock__items').then((elm1) => {
@@ -339,8 +352,6 @@ function fillPage() {
   }
 }
 
-
-
 function fillCardPage() {
   if (cpmData.length !== 0) {
     waitForElm('.product-page__goods-slider--promo').then((elm) => {
@@ -357,25 +368,10 @@ function fillCardPage() {
     waitForElm('#automatempBlock__card__list').then((elm) => {
       cpmData.forEach((item, index) => {
         elm.insertAdjacentHTML('beforeend', `
-          <li class="automatempBlock__card__list__item">${index + 1} - ${new Intl.NumberFormat('ru-RU').format(item.cpm)}</li>
+          <li class="automatempBlock__card__list__item">${index + 1} - ${new Intl.NumberFormat('ru-RU').format(item.cpm)} ₽</li>
         `)
       });
     })
-
-    //btn-main -> btn-base
-    // waitForElm('#options').then((elm) => {
-    //   elm.insertAdjacentHTML('beforeend', `
-    //     <div class="automatempSertif" id="automatempSertif">
-    //       <button class="btn-base">Заказать сертификацию</button>
-    //       <div class="automatempSertif__btn__img__block" id="automatempSertif__btn__img__block">
-
-    //       </div>
-    //     </div>     
-    //   `)
-    // })
-
-
-
   }
 }
 
@@ -604,119 +600,126 @@ function fillCertificate() {
     </div>       
   
   `);
-  if (document.getElementsByClassName('automatemp-modalCert').length === 0) {
-    document.getElementsByTagName('body')[0].insertAdjacentHTML('AfterBegin',
-      `<div id="automatemp-modalCert" class="automatemp-modalCert">
+  document.getElementsByTagName('body')[0].insertAdjacentHTML('AfterBegin',
+    `<div id="automatemp-modalCert" class="automatemp-modalCert">
       <div class="automatemp-modalCert_content">
         <span id="automatemp_CertClose">&times;</span>
-        <a class="automatempBlock__logo__link" href="https://automate-mp.ru/">
-          <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
-          <img class="automatempBlock__logo2" src="https://static.tildacdn.com/tild3436-3731-4466-b732-646465616236/1401a47a-25ef-4d45-b.svg"/>
-        </a>
-        <div class="automatemp-modalCert--title">Проверка сертификата / декларации</div>
+        <div class="automatemp-modalCert__title__box">
+          <a class="automatempBlock__logo__link" href="https://automate-mp.ru/">
+            <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
+            <div class="automatemp-modalCert--title">Проверка сертификата / декларации</div>
+          </a>
+        </div>
+        
         <ul class="automatemp-modalCert--content"></ul>
       </div>
     </div>`);
-    document.getElementById('automatempSertif__info__btn').addEventListener('click', function () {
-      document.getElementsByClassName('automatemp-modalCert--content')[0].innerHTML = '';
-      modalVisible();
-      document.getElementsByClassName('automatemp-modalCert--content')[0].insertAdjacentHTML('afterbegin', '<span class="loaderCert-automatemp" style="display:block;"></span>');
-      let prodId = document.getElementById('productNmId').innerText;
-      chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => {
-        console.log(response);
-        if (response.have_sertificate == null) {
-          document.getElementById('automatempSertif').style.display = 'none'
-          document.getElementById('automatemp-modalCert').style.display = 'none'
-          console.log('сорян');
-        }
-        if (response.length !== 0) {
-          document.querySelector('.loaderCert-automatemp').style.display = 'none';
-          var content = document.querySelector('.automatemp-modalCert--content');
-          if (!response.results.applicant || response.results.applicant === '') content.innerText = 'Нет данных';
-          var result = [];
-          for (const property in response.results) {
-            result.push({ property: property, value: response.results[property] })
-          }
-          result.forEach(item => {
-            var name;
-            switch (item.property) {
-              case 'decl_number':
-                name = 'Номер декларации';
-                break;
-              case 'declRegDate':
-                name = 'Дата регистрации декларации';
-                break;
-              case 'declEndDate':
-                name = 'Дата окончания декларации';
-                break;
-              case 'fullName':
-                name = 'Полное наименование';
-                break;
-              case 'applicant':
-                name = 'Заявитель';
-                break;
-              case 'applicant_ogrn':
-                name = 'ОГРН заявителя';
-                break;
-              case 'applicant_inn':
-                name = 'ИНН заявителя';
-                break;
-              case 'applicant_email':
-                name = 'Email заявителя';
-                break;
-              case 'applicant_phone':
-                name = 'Телефон заявителя';
-                break;
-              case 'applicant_address':
-                name = 'Адрес заявителя';
-                break;
-              case 'manufacturer':
-                name = 'Изготовитель';
-                break;
-              case 'manufacturer_address':
-                name = 'Адрес изготовителя';
-                break;
-              case 'testing_number':
-                name = 'Номер тестирования';
-                break;
-              case 'testing_lab_name':
-                name = 'Лаборатория тестирования';
-                break;
-              case 'testing_lab_address':
-                name = 'Адрес лаборатории тестирования';
-                break;
-              case 'protocol_date':
-                name = 'Дата протокола';
-                break;
-              case 'protocol_number':
-                name = 'Номер протокола';
-                break;
-              case 'basis':
-                name = 'Основание';
-                break;
-            }
-            if (item.value === null || item.value === 'null' || item.value === '') item.value = 'нет данных';
-            content.insertAdjacentHTML('beforeend', `<li><span class="text">${name}</span><span class="page">${item.value}</span></li>`)
-          })
-        }
-      })
-
-      
-
-
-      document.getElementById('automatemp_CertClose').addEventListener('click', function () {
-        modalOut();
-      })
-    })
-    
+  document.getElementById('automatempSertif__info__btn').addEventListener('click', function () {
+    document.getElementsByClassName('automatemp-modalCert--content')[0].innerHTML = '';
+    modalVisible();
+    document.getElementsByClassName('automatemp-modalCert--content')[0].insertAdjacentHTML('afterbegin', '<span class="loaderCert-automatemp" style="display:block;"></span>');
     let prodId = document.getElementById('productNmId').innerText;
-    chrome.runtime.sendMessage({ command: 'rosgoscert', id: prodId }, (response) => {
+    chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => {
       console.log(response);
-      waitForElm('.automatempSertif__rosgossert__btn').then((elm2)=>{
-        elm2.href = response
-      })
+      if (response.have_sertificate == null) {
+        document.getElementById('automatempSertif').style.display = 'none'
+        document.getElementById('automatemp-modalCert').style.display = 'none'
+      }
+      if (response.length !== 0) {
+        document.querySelector('.loaderCert-automatemp').style.display = 'none';
+        var content = document.querySelector('.automatemp-modalCert--content');
+        if (!response.results.applicant || response.results.applicant === '') content.innerText = 'Нет данных';
+        var result = [];
+        for (const property in response.results) {
+          result.push({ property: property, value: response.results[property] })
+        }
+        result.forEach(item => {
+          var name;
+          switch (item.property) {
+            case 'decl_number':
+              name = 'Номер декларации';
+              break;
+            case 'declRegDate':
+              name = 'Дата регистрации декларации';
+              break;
+            case 'declEndDate':
+              name = 'Дата окончания декларации';
+              break;
+            case 'fullName':
+              name = 'Полное наименование';
+              break;
+            case 'applicant':
+              name = 'Заявитель';
+              break;
+            case 'applicant_ogrn':
+              name = 'ОГРН заявителя';
+              break;
+            case 'applicant_inn':
+              name = 'ИНН заявителя';
+              break;
+            case 'applicant_email':
+              name = 'Email заявителя';
+              break;
+            case 'applicant_phone':
+              name = 'Телефон заявителя';
+              break;
+            case 'applicant_address':
+              name = 'Адрес заявителя';
+              break;
+            case 'manufacturer':
+              name = 'Изготовитель';
+              break;
+            case 'manufacturer_address':
+              name = 'Адрес изготовителя';
+              break;
+            case 'testing_number':
+              name = 'Номер тестирования';
+              break;
+            case 'testing_lab_name':
+              name = 'Лаборатория тестирования';
+              break;
+            case 'testing_lab_address':
+              name = 'Адрес лаборатории тестирования';
+              break;
+            case 'protocol_date':
+              name = 'Дата протокола';
+              break;
+            case 'protocol_number':
+              name = 'Номер протокола';
+              break;
+            case 'basis':
+              name = 'Основание';
+              break;
+          }
+          if (item.value === null || item.value === 'null' || item.value === '') item.value = 'нет данных';
+          content.insertAdjacentHTML('beforeend', `<li><span class="text">${name}</span><span class="page">${item.value}</span></li>`)
+        })
+
+        content.insertAdjacentHTML('beforeend', `<button class="btn-base automatemp-modalCert__btn-base" > Заказать сертификацию</button>`)
+      }
     })
-  }
+
+    document.getElementById('automatemp_CertClose').addEventListener('click', function () {
+      modalOut();
+    })
+  })
+
+  let prodId = document.getElementById('productNmId').innerText;
+  chrome.runtime.sendMessage({ command: 'rosgoscert', id: prodId }, (response) => {
+    console.log(response);
+    if (response) {
+      waitForElm('.automatempSertif__rosgossert__btn').then((elm2) => {
+        elm2.href = response
+        elm2.target = "_blank"
+      })
+    } else {
+      waitForElm('.automatempSertif__rosgossert__btn').then((elm2) => {
+        elm2.href = "javascript: void(0)"
+        elm2.removeAttribute("target")
+      })
+    }
+  })
+
 }
 
 function modalVisible() {
@@ -778,6 +781,94 @@ function fillPromos(wheel) {
   }
 }
 
+function fillFeedbacks() {
+  console.log(feedbacks);
+  if (feedbacks.length != 0) {
+
+    function feedbackCalcFunc() {
+      feedbacks.forEach((item) => {
+        if (item.reviews_count != 0) {
+          waitForElm('.automatemp__feedbacks-calc__inner').then((elm) => {
+            elm.insertAdjacentHTML('beforeend', `
+              <div class="automatemp__feedbacks-calc__ratebox">
+                <div class="automatemp__feedbacks-calc__ratebox-titlebox rating-product">
+                  <div class="rating-product__header">
+                    <div class="rating-product__all-rating">
+                      <b class="rating-product__numb">${item.rate}</b>
+                      <span class="rating-product__all-stars stars-line star${item.rate}"></span>
+                    </div>
+                    <p class="rating-product__review hide-mobile">
+                      ${item.reviews_count} ${declOfNum(item.reviews_count, ['отзыв', 'отзыва', 'отзывов'])}
+                    </p>
+                  </div>
+
+                  <div class="automatemp__feedbacks-calc__ratebox-items" id="automatemp__star${item.rate}">
+
+                  </div>
+                </div>  
+              </div>
+            `)
+          })
+
+          waitForElm('#automatemp__star' + item.rate).then((elm) => {
+            item.ratings.forEach((item1) => {
+              elm.insertAdjacentHTML('beforeend', `
+                <div class="automatemp__feedbacks-calc__ratebox-item">
+                  <h6 class="automatemp__feedbacks-calc__ratebox-item__rating">${item1.rate}</h6>
+                  <p class="automatemp__feedbacks-calc__ratebox-item__ratingCount">${item1.reviews_count} ${declOfNum(item1.reviews_count, ['отзыв', 'отзыва', 'отзывов'])}</p>
+                </div>
+              `)
+            })
+          })
+        }
+      })
+    }
+
+    feedbackCalcFunc()
+
+    waitForElm('.product-feedbacks__side').then((elm) => {
+      elm.insertAdjacentHTML('beforeend', `
+        <div class="automatemp__feedbacks" id="automatemp__feedbacks">
+          <button class="btn-base btn-base--lg rating-product__btn hide-mobile automatemp__feedbacks-btn" type="button">
+            <a class="automatemp__feedbacks-btn__link" href="https://automate-mp.ru/" target="_blank">
+              <div class="automatemp__feedbacks-btn__link-box">
+                <div class="automatemp__feedbacks-btn__link-box__logo-box">
+                  <img class="automatemp__feedbacks-btn__link-box__logo" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg">
+                </div>        
+                <div class="automatemp__feedbacks-btn__link-box__content">
+                  <div class="automatemp__feedbacks-btn__link-box__title-box">
+                    <img class="automatemp__feedbacks-btn__link-box__title" src="https://static.tildacdn.com/tild3436-3731-4466-b732-646465616236/1401a47a-25ef-4d45-b.svg">
+                  </div>
+                  <p class="automatemp__feedbacks-btn__link-box__descr">Заказать отзывы по 1 руб</p>
+                </div>        
+              </div>
+            </a>
+          </button>
+
+          <div class="automatemp__feedbacks-calc product-feedbacks">
+            <div class="automatemp__feedbacks-calc__inner">
+              <h3 class="automatemp__feedbacks-calc__title">Калькулятор</h3>
+            </div>
+          </div>
+          
+        </div>
+      `)
+    })
+
+    function handleResize() {
+      const windowWidth = window.innerWidth;
+      if (windowWidth < 1023.98) {
+        console.log('меньше');
+      } else {
+        console.log('больше');
+      }
+    }
+    handleResize()
+    window.addEventListener('load', handleResize);
+    window.addEventListener('resize', handleResize);
+  }
+}
+
 document.body.addEventListener('wheel', (event) => {
   event.wheelDeltaY < 0 ? fillPromos(true) : null;
 })
@@ -804,6 +895,8 @@ function clearData() {
     el.parentNode.removeChild(el);
     let el2 = document.getElementById('autmatemp__unitEconom__block');
     el2.parentNode.removeChild(el2);
+  } else if (currentUrl.includes('feedbacks')) {
+    feedbacks.length = 0;
 
   }
 }
