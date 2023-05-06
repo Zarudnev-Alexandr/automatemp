@@ -162,6 +162,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
 
   else if (message.command === 'certificate') {
+    console.log('Запрос');
     checkCert(message.id).then(response => {
       sendResponse(response)
     })
@@ -174,6 +175,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
 
   else if (message.command === 'feedbacks') {
+    console.log('get отзывы');
     let arr12 = [];
     fetch(`https://4947.ru/wb_extension/api/rating_calculator/${message.id}`)
       .then(response => response.json())

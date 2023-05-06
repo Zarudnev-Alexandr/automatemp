@@ -42,7 +42,6 @@ function getData() {
       for (let i = 0; i < items.length; i++) {
         let element = items[i];
         element.style.display = 'none';
-        element.style.display = 'none';
       }
       waitForElm('#automatempSertif').then((elm1) => {
         elm1.style.display = 'flex'
@@ -588,6 +587,7 @@ function rewriteLogistic() {
 }
 
 function fillCertificate() {
+  console.log('Сертификат');
   if (document.querySelectorAll('#automatempSertif').length === 0) document.querySelector('.certificate-check').insertAdjacentHTML('beforeend', `
     <div class="automatempSertif" id="automatempSertif">
       <button class="btn-base">Заказать сертификацию</button>
@@ -615,6 +615,7 @@ function fillCertificate() {
       </div>
     </div>`);
   document.getElementById('automatempSertif__info__btn').addEventListener('click', function () {
+    
     document.getElementsByClassName('automatemp-modalCert--content')[0].innerHTML = '';
     modalVisible();
     document.getElementsByClassName('automatemp-modalCert--content')[0].insertAdjacentHTML('afterbegin', '<span class="loaderCert-automatemp" style="display:block;"></span>');
@@ -814,7 +815,7 @@ function fillFeedbacks() {
             item.ratings.forEach((item1) => {
               elm.insertAdjacentHTML('beforeend', `
                 <div class="automatemp__feedbacks-calc__ratebox-item">
-                  <h6 class="automatemp__feedbacks-calc__ratebox-item__rating">${item1.rate}</h6>
+                  <h6 class="automatemp__feedbacks-calc__ratebox-item__rating">${item1.rate.toFixed(1)}</h6>
                   <p class="automatemp__feedbacks-calc__ratebox-item__ratingCount">${item1.reviews_count} ${declOfNum(item1.reviews_count, ['отзыв', 'отзыва', 'отзывов'])}</p>
                 </div>
               `)
@@ -855,12 +856,89 @@ function fillFeedbacks() {
       `)
     })
 
+    waitForElm('.product-feedbacks__main').then((elm) => {
+      const newDiv = document.createElement('div');
+      newDiv.classList.add('automatemp__feedbacks--adaptive')
+      newDiv.insertAdjacentHTML('beforeend', `
+        <details class="automatemp__feedbacks-calc__details">
+          <summary>Калькулятор</summary>
+          <div class="automatemp__feedbacks-calc product-feedbacks automatemp__feedbacks-calc--adaptive">
+            <div class="automatemp__feedbacks-calc__inner--adaptive">
+              
+            </div>
+          </div>
+        </details>
+      `)
+      let checkPhoto = document.getElementsByClassName('product-feedbacks__user-photos');
+      if (checkPhoto){
+        elm.insertBefore(newDiv, elm.children[3]);
+      }else{
+        elm.insertBefore(newDiv, elm.children[2]);
+      }
+    })
+
+
+    feedbacks.forEach((item) => {
+      if (item.reviews_count != 0) {
+        waitForElm('.automatemp__feedbacks-calc__inner--adaptive').then((elm) => {
+          elm.insertAdjacentHTML('beforeend', `
+              <div class="automatemp__feedbacks-calc__ratebox">
+                <div class="automatemp__feedbacks-calc__ratebox-titlebox rating-product">
+                  <div class="rating-product__header">
+                    <div class="rating-product__all-rating">
+                      <b class="rating-product__numb">${item.rate}</b>
+                      <span class="rating-product__all-stars stars-line star${item.rate}"></span>
+                    </div>
+                    <p class="rating-product__review hide-mobile">
+                      ${item.reviews_count} ${declOfNum(item.reviews_count, ['отзыв', 'отзыва', 'отзывов'])}
+                    </p>
+                  </div>
+
+                  <div class="automatemp__feedbacks-calc__ratebox-items" id="automatemp__star${item.rate}--adaptive">
+
+                  </div>
+                </div>  
+              </div>
+            `)
+        })
+
+        waitForElm('#automatemp__star' + item.rate + '--adaptive').then((elm) => {
+          item.ratings.forEach((item1) => {
+            elm.insertAdjacentHTML('beforeend', `
+                <div class="automatemp__feedbacks-calc__ratebox-item">
+                  <h6 class="automatemp__feedbacks-calc__ratebox-item__rating">${item1.rate.toFixed(1)}</h6>
+                  <p class="automatemp__feedbacks-calc__ratebox-item__ratingCount">${item1.reviews_count} ${declOfNum(item1.reviews_count, ['отзыв', 'отзыва', 'отзывов'])}</p>
+                </div>
+              `)
+          })
+        })
+      }
+    })
+
+    waitForElm('.product-page__price-history').then((elm) => {
+      waitForElm('.price-history').then((elm1) => {
+        elm1.addEventListener('click', function () {
+          elm1.classList.toggle('dropdown-open')
+        })
+      })
+    })
+
     function handleResize() {
       const windowWidth = window.innerWidth;
       if (windowWidth < 1023.98) {
-        console.log('меньше');
+        waitForElm('.automatemp__feedbacks--adaptive').then((elm) => {
+          elm.style.display = 'block'
+        })
+        waitForElm('#automatemp__feedbacks').then((elm) => {
+          elm.style.display = 'none'
+        })
       } else {
-        console.log('больше');
+        waitForElm('.automatemp__feedbacks--adaptive').then((elm) => {
+          elm.style.display = 'none'
+        })
+        waitForElm('#automatemp__feedbacks').then((elm) => {
+          elm.style.display = 'block'
+        })
       }
     }
     handleResize()
@@ -886,7 +964,7 @@ function clearData() {
     size.length = 0;
     priorityCategoriesData.length = 0;
     logistic.length = 0
-    certificate.length = 0
+    // certificate.length = 0
     let el = document.getElementById('automatempBlock');
     el.parentNode.removeChild(el);
   } else if (currentUrl.includes('detail.aspx')) {

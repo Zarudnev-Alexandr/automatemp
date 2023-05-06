@@ -681,7 +681,7 @@ ul.automatemp-modalCert--content li:after {
   margin-bottom: 30px;
 }
 
-.automatemp__feedbacks-calc__ratebox-items{
+.automatemp__feedbacks-calc__ratebox-items {
   margin-bottom: 40px;
 }
 
@@ -691,13 +691,58 @@ ul.automatemp-modalCert--content li:after {
   align-items: center;
 }
 
-.automatemp__feedbacks-calc__ratebox-item__rating{
+.automatemp__feedbacks-calc__ratebox-item__rating {
   font-size: 16px;
   margin-left: 22px;
 }
 
-.automatemp__feedbacks-calc__ratebox-item__ratingCount{
+.automatemp__feedbacks-calc__ratebox-item__ratingCount {
   font-size: 16px;
   font-weight: 400;
   color: #868695;
+}
+
+details summary::marker {
+  font-size: 0;
+}
+
+details {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+details+details {
+  margin-top: 80px;
+}
+
+summary {
+  position: relative;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-right: 90px;
+}
+
+details>summary:after {
+  content: "+";
+  position: absolute;
+  font-size: 30px;
+  font-weight: 400;
+  width: auto;
+  height: auto;
+  right: 0;
+  top: 0;
+  transition: all .3s;
+}
+
+details[open]>summary:after {
+  transform: rotate(45deg);
+  transition: all .3s;
+}
+
+.automatemp__feedbacks-calc--adaptive{
+  margin-top: 20px;
 }
