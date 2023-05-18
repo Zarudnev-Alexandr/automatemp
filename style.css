@@ -98,6 +98,7 @@
   overflow: hidden;
   padding-right: 5px;
   text-overflow: ellipsis;
+  padding-bottom: 2px;
 }
 
 .automatempBlock__item__label {
@@ -108,6 +109,7 @@
   overflow: hidden;
   padding-right: 5px;
   text-overflow: ellipsis;
+  padding-bottom: 2px;
 }
 
 .automatempBlock__item__addition {
@@ -188,6 +190,55 @@
   align-items: center;
 }
 
+.categoryPriority__deliveryTime__box {
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryPriority__deliveryTime__item {
+  padding: 14px 24px;
+  box-shadow: 0px 0px 20px 1px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  /* margin-bottom: 50px; */
+}
+
+.categoryPriority__deliveryTime__item__title {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 13px;
+}
+
+.categoryPriority__deliveryTime__item__time {
+  font-weight: 700;
+  font-size: 25px;
+  line-height: 30px;
+  color: #367920;
+}
+
+.categoryPriority__deliveryTime__item+.categoryPriority__deliveryTime__item {
+  margin-top: 26px;
+}
+
+@media (max-width: 1024px) {
+  .categoryPriority__wrapper1 {
+    align-items: self-start;
+    flex-direction: column;
+  }
+
+  .categoryPriority__deliveryTime__box {
+    flex-direction: row;
+  }
+
+  .categoryPriority__deliveryTime__item {
+    margin-bottom: 50px;
+  }
+
+  .categoryPriority__deliveryTime__item+.categoryPriority__deliveryTime__item {
+    margin-left: 30px;
+    margin-top: 0;
+  }
+}
+
 .categoryPriority__table1 {
   width: 540px;
   margin-bottom: 50px;
@@ -222,36 +273,8 @@
   padding-right: 10px;
 }
 
-.categoryPriority__deliveryTime__box {
-  display: flex;
-  flex-direction: column;
-}
-
-.categoryPriority__deliveryTime__item {
-  padding: 14px 24px;
-  box-shadow: 0px 0px 20px 1px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-}
-
-.categoryPriority__deliveryTime__item__title {
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 13px;
-}
-
-.categoryPriority__deliveryTime__item__time {
-  font-weight: 700;
-  font-size: 25px;
-  line-height: 30px;
-  color: #367920;
-}
-
 .red__time {
   color: #FF0000;
-}
-
-.categoryPriority__deliveryTime__item+.categoryPriority__deliveryTime__item {
-  margin-top: 26px;
 }
 
 .categoryPriority__wrapper2 {
@@ -368,6 +391,13 @@
   max-height: 700px;
 }
 
+.categoryPriority__thead {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+}
+
 .categoryPriority__tbody__td__withimg {
   position: relative;
 }
@@ -404,8 +434,8 @@
 
 .automatempBlock__card__list__item {
   font-style: normal;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: regular;
+  font-size: 14px;
   line-height: 18px;
   padding: 10px;
   color: #000000;
@@ -498,7 +528,7 @@
 
 .automatemp__unitEconom__select {
   width: 220px;
-  padding: 9px 110px 9px 10px;
+  padding: 9px 10px 9px 10px;
   font-style: normal;
   font-weight: 400;
   font-size: 14px;
@@ -510,6 +540,18 @@
   cursor: pointer;
   display: block;
   margin-bottom: -15px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.automatemp__unitEconom__select::before {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .automatemp__unitEconom__select {
+    margin-bottom: 10px;
+  }
 }
 
 .automatemp__unitEconom__select option {
@@ -554,13 +596,13 @@
 
 .automatemp-modalCert_content {
   background-color: #fefefe;
-  margin: 0 auto;
+  left: 50%;
   padding: 30px 40px;
   max-width: 700px;
-  border-radius: 35px;
+  border-radius: 20px;
   position: relative;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   overflow: auto;
   height: 700px;
   display: flex;
@@ -575,7 +617,7 @@
   height: 35px;
   width: 35px;
   font-size: 35px;
-  color: rgb(140, 140, 154);
+  color: #9D9DA4;
 }
 
 .automatemp-modalCert--content .loaderCert-automatemp {
@@ -743,6 +785,120 @@ details[open]>summary:after {
   transition: all .3s;
 }
 
-.automatemp__feedbacks-calc--adaptive{
+.automatemp__feedbacks-calc--adaptive {
   margin-top: 20px;
+}
+
+#warehousesBlock {
+  margin-top: 40px;
+}
+
+.automatemp__warehouses-details>.automatemp__warehouses-summary:after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #b9b9c1;
+  border-bottom: 2px solid #b9b9c1;
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  margin-top: -6px;
+  box-sizing: content-box;
+  transform-origin: 7px 7px;
+  transform: rotate(45deg);
+  transition: all .3s ease 0s;
+}
+
+.automatemp__warehouses-details[open]>.automatemp__warehouses-summary:after {
+  transform: rotate(225deg);
+}
+
+.automatemp__warehouses-radio {
+  background: #F1F1F5;
+  padding: 4px;
+  border-radius: 5px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 290px;
+  height: 37px;
+}
+
+.automatemp__warehouses-radio input {
+  width: auto;
+  height: 100%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 4px 8px;
+  background: #454857;
+  color: #000;
+  font-size: 14px;
+  font-weight: 510;
+  line-height: 0;
+  width: 147px;
+  height: 31px;
+  background-color: transparent;
+  margin: 0;
+  position: relative;
+}
+
+.automatemp__warehouses-radio input:checked {
+  background-color: #fff;
+}
+
+.automatemp__warehouses-radio input:before {
+  content: attr(label);
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.automatemp__warehouses-table {
+  margin-top: 23px;
+  width: 95%;
+}
+
+.automatemp__warehouses-table__tbody tr {
+  border-bottom: 1px solid #E8E8E8;
+}
+
+.automatemp__warehouses-table__tbody tr:last-child{
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.automatemp__warehouses-table__tbody-td {
+  font-size: 14px;
+  line-height: 17px;
+  color: #000;
+  padding-right: 5px;
+  padding-bottom: 6px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.automatemp__warehouses-table__tbody-td--regular {
+  max-width: 160px;
+}
+
+.automatemp__warehouses-table__tbody-td--bold {
+  font-weight: 510;
+  max-width: 160px;
+}
+
+.automatemp__warehouses-table__tbody-td--lite {
+  font-weight: 510;
+  color: #919191;
 }

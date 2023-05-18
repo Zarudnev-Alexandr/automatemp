@@ -36,7 +36,6 @@ function getData() {
     })
 
     waitForElm(`.certificate-check`).then((elm) => {
-      console.log(elm);
 
       var items = document.getElementsByClassName('certificate-check__wrap');
       for (let i = 0; i < items.length; i++) {
@@ -48,6 +47,11 @@ function getData() {
       })
       fillCertificate();
     })
+
+    waitForElm('.product-page__aside-container').then((elm) => {
+      fillWarehouses(true);
+    })
+
   } else if (currentUrl.includes('wildberries.ru/catalog') && currentUrl.includes('feedbacks')) {//Отзывы
     let prodId = currentUrl.split('/')[4]
     chrome.runtime.sendMessage({ command: 'feedbacks', id: prodId });
@@ -180,7 +184,6 @@ function fillPage() {
       // Скрытие и показ основного блока
       document.querySelector('#wholeAuction__id').addEventListener('click', function () {
         document.querySelector('#categoryPriorityId').classList.toggle('hide');
-        console.log(document.querySelector('#categoryPriorityId'));
         if (document.querySelector('#categoryPriorityId').classList.contains('hide')) {
           document.querySelector('#wholeAuction__id').textContent = 'Показать ауцкцион'
         } else {
@@ -197,7 +200,9 @@ function fillPage() {
                 `
                 <div class="automatempBlock__item">
                   <div class="automatempBlock__item__inner">
-                    <img class="automatempBlock__item__img" src="https:${ImgLinkSlice(item1.id)}/images/big/1.jpg" />
+                    <a href="https://www.wildberries.ru/catalog/${item1.id}/detail.aspx" target="_blank"> 
+                      <img class="automatempBlock__item__img" src="https:${ImgLinkSlice(item1.id)}/images/big/1.jpg" />
+                    </a>
                     <div class="automatempBlock__item__box automatempBlock__item__box1">
                       <h6 class="automatempBlock__item__title">${item1.name}</h6>
                       <p class="automatempBlock__item__label">${item1.brand}</p>
@@ -208,7 +213,7 @@ function fillPage() {
                     </div>
                     <div class="automatempBlock__item__box automatempBlock__item__box2">
                       <p class="automatempBlock__item__place">${index + 1}</p>
-                      <a class="automatempBlock__item__share__link" href="https://www.wildberries.ru/catalog/${item1.id}/detail.aspx">
+                      <a class="automatempBlock__item__share__link" href="https://www.wildberries.ru/catalog/${item1.id}/detail.aspx" target="_blank">
                         <img class="automatempBlock__item__share" src="https://www.svgrepo.com/show/471880/share-04.svg" />
                       </a>
                     </div>
@@ -587,7 +592,6 @@ function rewriteLogistic() {
 }
 
 function fillCertificate() {
-  console.log('Сертификат');
   if (document.querySelectorAll('#automatempSertif').length === 0) document.querySelector('.certificate-check').insertAdjacentHTML('beforeend', `
     <div class="automatempSertif" id="automatempSertif">
       <button class="btn-base">Заказать сертификацию</button>
@@ -600,8 +604,9 @@ function fillCertificate() {
     </div>       
   
   `);
-  document.getElementsByTagName('body')[0].insertAdjacentHTML('AfterBegin',
-    `<div id="automatemp-modalCert" class="automatemp-modalCert">
+  if (document.querySelectorAll('#automatemp-modalCert').length === 0) {
+    document.getElementsByTagName('body')[0].insertAdjacentHTML('AfterBegin',
+      `<div id="automatemp-modalCert" class="automatemp-modalCert">
       <div class="automatemp-modalCert_content">
         <span id="automatemp_CertClose">&times;</span>
         <div class="automatemp-modalCert__title__box">
@@ -613,101 +618,105 @@ function fillCertificate() {
         
         <ul class="automatemp-modalCert--content"></ul>
       </div>
-    </div>`);
-  document.getElementById('automatempSertif__info__btn').addEventListener('click', function () {
-    
-    document.getElementsByClassName('automatemp-modalCert--content')[0].innerHTML = '';
-    modalVisible();
-    document.getElementsByClassName('automatemp-modalCert--content')[0].insertAdjacentHTML('afterbegin', '<span class="loaderCert-automatemp" style="display:block;"></span>');
-    let prodId = document.getElementById('productNmId').innerText;
-    chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => {
-      console.log(response);
-      if (response.have_sertificate == null) {
-        document.getElementById('automatempSertif').style.display = 'none'
-        document.getElementById('automatemp-modalCert').style.display = 'none'
-      }
-      if (response.length !== 0) {
-        document.querySelector('.loaderCert-automatemp').style.display = 'none';
-        var content = document.querySelector('.automatemp-modalCert--content');
-        if (!response.results.applicant || response.results.applicant === '') content.innerText = 'Нет данных';
-        var result = [];
-        for (const property in response.results) {
-          result.push({ property: property, value: response.results[property] })
+    </div>`
+    );
+    document.getElementById('automatempSertif__info__btn').addEventListener('click', function () {
+      document.getElementsByClassName('automatemp-modalCert--content')[0].innerHTML = '';
+      modalVisible();
+      document.getElementsByClassName('automatemp-modalCert--content')[0].insertAdjacentHTML('afterbegin', '<span class="loaderCert-automatemp" style="display:block;"></span>');
+      let prodId = document.getElementById('productNmId').innerText;
+      chrome.runtime.sendMessage({ command: 'certificate', id: prodId }, (response) => {
+        if (response.have_sertificate == null) {
+          document.getElementById('automatempSertif').style.display = 'none'
+          document.getElementById('automatemp-modalCert').style.display = 'none'
         }
-        result.forEach(item => {
-          var name;
-          switch (item.property) {
-            case 'decl_number':
-              name = 'Номер декларации';
-              break;
-            case 'declRegDate':
-              name = 'Дата регистрации декларации';
-              break;
-            case 'declEndDate':
-              name = 'Дата окончания декларации';
-              break;
-            case 'fullName':
-              name = 'Полное наименование';
-              break;
-            case 'applicant':
-              name = 'Заявитель';
-              break;
-            case 'applicant_ogrn':
-              name = 'ОГРН заявителя';
-              break;
-            case 'applicant_inn':
-              name = 'ИНН заявителя';
-              break;
-            case 'applicant_email':
-              name = 'Email заявителя';
-              break;
-            case 'applicant_phone':
-              name = 'Телефон заявителя';
-              break;
-            case 'applicant_address':
-              name = 'Адрес заявителя';
-              break;
-            case 'manufacturer':
-              name = 'Изготовитель';
-              break;
-            case 'manufacturer_address':
-              name = 'Адрес изготовителя';
-              break;
-            case 'testing_number':
-              name = 'Номер тестирования';
-              break;
-            case 'testing_lab_name':
-              name = 'Лаборатория тестирования';
-              break;
-            case 'testing_lab_address':
-              name = 'Адрес лаборатории тестирования';
-              break;
-            case 'protocol_date':
-              name = 'Дата протокола';
-              break;
-            case 'protocol_number':
-              name = 'Номер протокола';
-              break;
-            case 'basis':
-              name = 'Основание';
-              break;
+        if (response.length !== 0) {
+          document.querySelector('.loaderCert-automatemp').style.display = 'none';
+          var content = document.querySelector('.automatemp-modalCert--content');
+          if (!response.results.applicant || response.results.applicant === '') content.innerText = 'Нет данных';
+          var result = [];
+          for (const property in response.results) {
+            result.push({ property: property, value: response.results[property] })
           }
-          if (item.value === null || item.value === 'null' || item.value === '') item.value = 'нет данных';
-          content.insertAdjacentHTML('beforeend', `<li><span class="text">${name}</span><span class="page">${item.value}</span></li>`)
-        })
+          result.forEach(item => {
+            var name;
+            switch (item.property) {
+              case 'decl_number':
+                name = 'Номер декларации';
+                break;
+              case 'declRegDate':
+                name = 'Дата регистрации декларации';
+                break;
+              case 'declEndDate':
+                name = 'Дата окончания декларации';
+                break;
+              case 'fullName':
+                name = 'Полное наименование';
+                break;
+              case 'applicant':
+                name = 'Заявитель';
+                break;
+              case 'applicant_ogrn':
+                name = 'ОГРН заявителя';
+                break;
+              case 'applicant_inn':
+                name = 'ИНН заявителя';
+                break;
+              case 'applicant_email':
+                name = 'Email заявителя';
+                break;
+              case 'applicant_phone':
+                name = 'Телефон заявителя';
+                break;
+              case 'applicant_address':
+                name = 'Адрес заявителя';
+                break;
+              case 'manufacturer':
+                name = 'Изготовитель';
+                break;
+              case 'manufacturer_address':
+                name = 'Адрес изготовителя';
+                break;
+              case 'testing_number':
+                name = 'Номер тестирования';
+                break;
+              case 'testing_lab_name':
+                name = 'Лаборатория тестирования';
+                break;
+              case 'testing_lab_address':
+                name = 'Адрес лаборатории тестирования';
+                break;
+              case 'protocol_date':
+                name = 'Дата протокола';
+                break;
+              case 'protocol_number':
+                name = 'Номер протокола';
+                break;
+              case 'basis':
+                name = 'Основание';
+                break;
+            }
+            if (item.value === null || item.value === 'null' || item.value === '') item.value = 'нет данных';
+            content.insertAdjacentHTML('beforeend', `<li><span class="text">${name}</span><span class="page">${item.value}</span></li>`)
+          })
 
-        content.insertAdjacentHTML('beforeend', `<button class="btn-base automatemp-modalCert__btn-base" > Заказать сертификацию</button>`)
-      }
-    })
+          content.insertAdjacentHTML('beforeend', `<button class="btn-base automatemp-modalCert__btn-base" > Заказать сертификацию</button>`)
 
-    document.getElementById('automatemp_CertClose').addEventListener('click', function () {
-      modalOut();
+          document.addEventListener('click', clickOutsidePopUp);
+        }
+      })
+
+      document.getElementById('automatemp_CertClose').addEventListener('click', function () {
+        modalOut();
+      })
+
+
     })
-  })
+  }
+
 
   let prodId = document.getElementById('productNmId').innerText;
   chrome.runtime.sendMessage({ command: 'rosgoscert', id: prodId }, (response) => {
-    console.log(response);
     if (response) {
       waitForElm('.automatempSertif__rosgossert__btn').then((elm2) => {
         elm2.href = response
@@ -729,8 +738,105 @@ function modalVisible() {
 
 function modalOut() {
   document.getElementById('automatemp-modalCert').style.display = 'none';
+  document.removeEventListener('click', clickOutsidePopUp);
 }
 
+function clickOutsidePopUp(event) {
+  const modal = document.querySelector('.automatemp-modalCert_content');
+  const isClickInsideModal = modal.contains(event.target);
+  if (!isClickInsideModal) {
+    modalOut()
+  }
+}
+
+function fillWarehouses(updatePage) {
+  //Проверка на то, что блока со складами на странице нет. Если проверка прошла, то создаем этот блок
+  if (document.querySelectorAll('#warehousesBlock').length == 0) {
+    document.querySelector('.product-page__aside-container').insertAdjacentHTML('beforeend', `
+      <div id="warehousesBlock">
+        <details class="automatemp__warehouses-details">
+          <summary class="automatemp__warehouses-summary">Склады</summary>
+          <div class="automatemp__warehouses-wrapper">
+            <div class="automatemp__warehouses-radio">
+              <input label="По складам" type="radio" id="automatemp__warehouses-warehouse" name="warehouse-size" value="warehouse" checked>
+              <input label="По размерам" type="radio" id="automatemp__warehouses-size" name="warehouse-size" value="size">
+            </div>
+          </div>
+        </details>
+      </div>      
+    `)
+
+    function fillWarehousesWarehouses() {
+      if (document.querySelector('.automatemp__warehouses-table')) {// Очищаем оставшуюся таблицу, если была
+        let el = document.querySelector('.automatemp__warehouses-table');
+        el.parentNode.removeChild(el)
+      }
+      if (document.getElementById('automatemp__warehouses-warehouse').checked) {
+        chrome.runtime.sendMessage({ command: 'warehouses-warehouse', id: prodId }, (response) => {
+          //Если результат запроса не пустой, отрисовываем основу таблицы
+          if (response.length != 0) {
+            document.querySelector('.automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
+              <table class="automatemp__warehouses-table">
+                <tbody class="automatemp__warehouses-table__tbody">
+                </tbody>
+              </table>
+            `)
+            //Находим основу таблицы и заполняем ее данными из результата запроса
+            let elm = document.querySelector('.automatemp__warehouses-table__tbody');
+            response.forEach(item => {
+              elm.insertAdjacentHTML('beforeend', `
+                <tr>
+                  <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--regular">${item.warehouse_name}</td>
+                  <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--bold">${item.percent}%</td>
+                  <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--lite">${item.qty} шт.</td>
+                </tr>
+              `)
+            })
+          }
+        });
+      }
+    }
+
+    let prodId = document.getElementById('productNmId').innerText;
+
+    fillWarehousesWarehouses() //Когда пользователь только зайдет на страницу, у него сразу появятся склады, для размеров отдельной функции нет
+
+    document.getElementById('automatemp__warehouses-warehouse').addEventListener('click', function () {
+      //Если пользователь выбрал склады
+      fillWarehousesWarehouses();
+    })
+
+    document.getElementById('automatemp__warehouses-size').addEventListener('click', function () {
+      //Если пользователь выбрал размеры
+      if (document.querySelector('.automatemp__warehouses-table')) {// Очищаем оставшуюся таблицу, если была
+        let el = document.querySelector('.automatemp__warehouses-table');
+        el.parentNode.removeChild(el)
+      }
+      if (document.getElementById('automatemp__warehouses-size').checked) {
+        chrome.runtime.sendMessage({ command: 'warehouses-size', id: prodId }, (response) => {
+          if (response.length != 0) {
+            document.querySelector('.automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
+              <table class="automatemp__warehouses-table">
+                <tbody class="automatemp__warehouses-table__tbody">
+                </tbody>
+              </table>
+            `)
+          }
+          let elm = document.querySelector('.automatemp__warehouses-table__tbody');
+          response.forEach(item => {
+            elm.insertAdjacentHTML('beforeend', `
+                <tr>
+                  <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--regular">${item.size}</td>
+                  <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--bold">${item.warehouse_name}</td>
+                  <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--lite">${item.qty} шт.</td>
+                </tr>
+              `)
+          })
+        });
+      }
+    })
+  }
+}
 
 function ImgLinkSlice(nmId) {
   const nm = parseInt(nmId, 10),
@@ -783,7 +889,6 @@ function fillPromos(wheel) {
 }
 
 function fillFeedbacks() {
-  console.log(feedbacks);
   if (feedbacks.length != 0) {
 
     function feedbackCalcFunc() {
@@ -870,9 +975,9 @@ function fillFeedbacks() {
         </details>
       `)
       let checkPhoto = document.getElementsByClassName('product-feedbacks__user-photos');
-      if (checkPhoto){
+      if (checkPhoto) {
         elm.insertBefore(newDiv, elm.children[3]);
-      }else{
+      } else {
         elm.insertBefore(newDiv, elm.children[2]);
       }
     })
@@ -950,6 +1055,7 @@ function fillFeedbacks() {
 document.body.addEventListener('wheel', (event) => {
   event.wheelDeltaY < 0 ? fillPromos(true) : null;
 })
+
 function clearData() {
   currentUrl = window.location.href;
   if (
@@ -964,7 +1070,6 @@ function clearData() {
     size.length = 0;
     priorityCategoriesData.length = 0;
     logistic.length = 0
-    // certificate.length = 0
     let el = document.getElementById('automatempBlock');
     el.parentNode.removeChild(el);
   } else if (currentUrl.includes('detail.aspx')) {
