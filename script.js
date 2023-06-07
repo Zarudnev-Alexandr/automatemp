@@ -158,7 +158,7 @@ function declOfNum(number, words) {
   return words[(number % 100 > 4 && number % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(number % 10 < 5) ? Math.abs(number) % 10 : 5]];
 }
 
-function fillPage() {
+function fillPage() {//Основная страница (10 карточек товаров и аукцион)
   if (jsonSearchData.length != 0 && jsonSearchSpecificData.length != 0 && tableCardsData.length != 0 && priorityCategoriesData.length != 0 && timeInfoData.length != 0) {
     waitForElm('.catalog-page__searching-results').then((elm) => {
       elm.insertAdjacentHTML(
@@ -480,7 +480,7 @@ function unitEconomFillPage() {
 
 
                 <h3 class="product-params__caption automatemp__unitEconom__table__title">Логистика, хранение и приёмка *</h3>
-                <select class="automatemp__unitEconom__select" id="#automatemp__unitEconom__select">
+                <select class="automatemp__unitEconom__select automatemp__unitEconom__select-unit" id="#automatemp__unitEconom__select">
 
                 </select>
                 <table class="product-params__table automatemp__logistic__table">
@@ -561,16 +561,16 @@ function unitEconomFillPage() {
     });
   })
 
-  waitForElm('.automatemp__unitEconom__select').then((elm) => {
+  waitForElm('.automatemp__unitEconom__select-unit').then((elm) => {
     var selectString = '';
     wareHouses.forEach(item => {
       selectString += `<option value="${item.id}">${item.name}</option>`;
     });
-    [...document.getElementsByClassName('automatemp__unitEconom__select')].forEach(elem => {
+    [...document.getElementsByClassName('automatemp__unitEconom__select-unit')].forEach(elem => {
       elem.insertAdjacentHTML('beforeend', selectString);
     });
 
-    [...document.getElementsByClassName('automatemp__unitEconom__select')].forEach(elem => {
+    [...document.getElementsByClassName('automatemp__unitEconom__select-unit')].forEach(elem => {
       elem.addEventListener('change', e => {
         var prodId;
         waitForElm('#productNmId').then((elm) => {
@@ -754,7 +754,7 @@ function fillWarehouses(updatePage) {
   if (document.querySelectorAll('#warehousesBlock').length == 0) {
     document.querySelector('.product-page__aside-container').insertAdjacentHTML('beforeend', `
       <div id="warehousesBlock">
-        <details class="automatemp__warehouses-details">
+        <details class="automatemp__warehouses-details automatemp__warehouses-details__warehouses">
           <summary class="automatemp__warehouses-summary">Склады</summary>
           <div class="automatemp__warehouses-wrapper">
             <div class="automatemp__warehouses-radio">
@@ -763,78 +763,245 @@ function fillWarehouses(updatePage) {
             </div>
           </div>
         </details>
+        <details class="automatemp__warehouses-details">
+          <summary class="automatemp__warehouses-summary">В избранное</summary>
+          <div class="automatemp__warehouses-wrapper">
+            <input class="automatemp__warehouses-input" type="text", id="automatemp__warehouses-input__favorites" placeholder="Поисковый запрос"/>
+            <div class="automatemp__warehouses-content__box">
+              <form>
+                <div class="__select __select1" data-state="">
+                  <div class="__select__title __select__title1" data-default="3 часа">3 часа</div>
+                  <div class="__select__content __select__content1">
+                    <input id="favorities-1" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="favorities-1" class="__select__label __select__label1">3 часа</label>
+                    <input id="favorities0" class="__select__input" type="radio" name="favoritiesSelect" checked />
+                    <label for="favorities0" class="__select__label __select__label1">3 часа</label>
+                    <input id="favorities1" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="favorities1" class="__select__label __select__label1">12 часов</label>             
+                    <input id="favorities2" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="favorities2" class="__select__label __select__label1">1 день</label>             
+                    <input id="favorities3" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="favorities3" class="__select__label __select__label1">3 дня</label>             
+                    <input id="favorities4" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="favorities4" class="__select__label __select__label1">7 дней</label>             
+                    <input id="favorities5" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="favorities5" class="__select__label __select__label1">14 дней</label>             
+                  </div>
+                </div>
+              </form>         
+              <div class="number-input">
+                <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()"></button>
+                <input class="quantity" min="0" name="quantity" value="0" type="number">
+                <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()"></button>
+              </div>
+            </div>
+            <button class="btn-base automatemp__warehouses-order_btn">Заказать</button>                        
+          </div>
+        </details>
+        <details class="automatemp__warehouses-details">
+          <summary class="automatemp__warehouses-summary">В корзину</summary>
+          <div class="automatemp__warehouses-wrapper">
+            <input class="automatemp__warehouses-input" type="text", id="automatemp__warehouses-input__favorites" placeholder="Поисковый запрос"/>
+            <div class="automatemp__warehouses-content__box">
+              <form>
+                <div class="__select __select2" data-state="">
+                  <div class="__select__title __select__title2" data-default="3 часа">3 часа</div>
+                  <div class="__select__content __select__content2">
+                    <input id="backet-1" class="__select__input" type="radio" name="backetSelect" />
+                    <label for="backet-1" class="__select__label __select__label2">3 часа</label>
+                    <input id="backet0" class="__select__input" type="radio" name="favoritiesSelect" checked />
+                    <label for="backet0" class="__select__label __select__label2">3 часа</label>
+                    <input id="backet1" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="backet1" class="__select__label __select__label2">12 часов</label>             
+                    <input id="backet2" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="backet2" class="__select__label __select__label2">1 день</label>             
+                    <input id="backet3" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="backet3" class="__select__label __select__label2">3 дня</label>             
+                    <input id="backet4" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="backet4" class="__select__label __select__label2">7 дней</label>             
+                    <input id="backet5" class="__select__input" type="radio" name="favoritiesSelect" />
+                    <label for="backet5" class="__select__label __select__label2">14 дней</label>             
+                  </div>
+                </div>
+              </form>                 
+              <div class="number-input">
+                <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()"></button>
+                <input class="quantity" min="0" name="quantity" value="0" type="number">
+                <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()"></button>
+              </div>
+            </div>
+            <button class="btn-base automatemp__warehouses-order_btn">Заказать</button>                        
+          </div>
+        </details>
       </div>      
     `)
 
-    function fillWarehousesWarehouses() {
-      if (document.querySelector('.automatemp__warehouses-table')) {// Очищаем оставшуюся таблицу, если была
-        let el = document.querySelector('.automatemp__warehouses-table');
-        el.parentNode.removeChild(el)
+    function updateWarehouses(update) { //Обновление данных складов, избранного и корзины. Нужно при изменении ширины страницы
+      const selectSingle1 = document.querySelector('.__select1');
+      const selectSingle_title1 = selectSingle1.querySelector('.__select__title1');
+      const selectSingle_labels1 = selectSingle1.querySelectorAll('.__select__label1');
+      // Toggle menu
+      selectSingle_title1.addEventListener('click', () => {
+        if ('active' === selectSingle1.getAttribute('data-state')) {
+          selectSingle1.setAttribute('data-state', '');
+        } else {
+          selectSingle1.setAttribute('data-state', 'active');
+        }
+      });
+      // Close when click to option
+      for (let i = 0; i < selectSingle_labels1.length; i++) {
+        selectSingle_labels1[i].addEventListener('click', (evt) => {
+          selectSingle_title1.textContent = evt.target.textContent;
+          selectSingle1.setAttribute('data-state', '');
+        });
       }
-      if (document.getElementById('automatemp__warehouses-warehouse').checked) {
-        chrome.runtime.sendMessage({ command: 'warehouses-warehouse', id: prodId }, (response) => {
-          //Если результат запроса не пустой, отрисовываем основу таблицы
-          if (response.length != 0) {
-            document.querySelector('.automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
+
+      const selectSingle2 = document.querySelector('.__select2');
+      const selectSingle_title2 = selectSingle2.querySelector('.__select__title2');
+      const selectSingle_labels2 = selectSingle2.querySelectorAll('.__select__label2');
+      // Toggle menu
+      selectSingle_title2.addEventListener('click', () => {
+        if ('active' === selectSingle2.getAttribute('data-state')) {
+          selectSingle2.setAttribute('data-state', '');
+        } else {
+          selectSingle2.setAttribute('data-state', 'active');
+        }
+      });
+      // Close when click to option
+      for (let i = 0; i < selectSingle_labels2.length; i++) {
+        selectSingle_labels2[i].addEventListener('click', (evt) => {
+          selectSingle_title2.textContent = evt.target.textContent;
+          selectSingle2.setAttribute('data-state', '');
+        });
+      }
+
+      function fillWarehousesWarehouses() {
+        if (document.querySelector('.automatemp__warehouses-table')) {// Очищаем оставшуюся таблицу, если была
+          let el = document.querySelector('.automatemp__warehouses-table');
+          el.parentNode.removeChild(el)
+        }
+        if (document.getElementById('automatemp__warehouses-warehouse').checked) {
+          chrome.runtime.sendMessage({ command: 'warehouses-warehouse', id: prodId }, (response) => {
+            //Если результат запроса не пустой, отрисовываем основу таблицы
+            if (response.length != 0) {
+              document.querySelector('.automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
               <table class="automatemp__warehouses-table">
                 <tbody class="automatemp__warehouses-table__tbody">
                 </tbody>
               </table>
             `)
-            //Находим основу таблицы и заполняем ее данными из результата запроса
-            let elm = document.querySelector('.automatemp__warehouses-table__tbody');
-            response.forEach(item => {
-              elm.insertAdjacentHTML('beforeend', `
+              //Находим основу таблицы и заполняем ее данными из результата запроса
+              let elm = document.querySelector('.automatemp__warehouses-table__tbody');
+              response.forEach(item => {
+                elm.insertAdjacentHTML('beforeend', `
                 <tr>
                   <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--regular">${item.warehouse_name}</td>
                   <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--bold">${item.percent}%</td>
                   <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--lite">${item.qty} шт.</td>
                 </tr>
               `)
-            })
-          }
-        });
+              })
+            }
+          });
+        }
       }
-    }
 
-    let prodId = document.getElementById('productNmId').innerText;
+      let prodId = document.getElementById('productNmId').innerText;
 
-    fillWarehousesWarehouses() //Когда пользователь только зайдет на страницу, у него сразу появятся склады, для размеров отдельной функции нет
+      if (update) fillWarehousesWarehouses() //Когда пользователь только зайдет на страницу, у него сразу появятся склады, для размеров отдельной функции нет
 
-    document.getElementById('automatemp__warehouses-warehouse').addEventListener('click', function () {
-      //Если пользователь выбрал склады
-      fillWarehousesWarehouses();
-    })
+      document.getElementById('automatemp__warehouses-warehouse').addEventListener('click', function () {
+        //Если пользователь выбрал склады
+        fillWarehousesWarehouses();
+      })
 
-    document.getElementById('automatemp__warehouses-size').addEventListener('click', function () {
-      //Если пользователь выбрал размеры
-      if (document.querySelector('.automatemp__warehouses-table')) {// Очищаем оставшуюся таблицу, если была
-        let el = document.querySelector('.automatemp__warehouses-table');
-        el.parentNode.removeChild(el)
-      }
-      if (document.getElementById('automatemp__warehouses-size').checked) {
-        chrome.runtime.sendMessage({ command: 'warehouses-size', id: prodId }, (response) => {
-          if (response.length != 0) {
-            document.querySelector('.automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
+      document.getElementById('automatemp__warehouses-size').addEventListener('click', function () {
+        //Если пользователь выбрал размеры
+        if (document.querySelector('.automatemp__warehouses-table')) {// Очищаем оставшуюся таблицу, если была
+          let el = document.querySelector('.automatemp__warehouses-table');
+          el.parentNode.removeChild(el)
+        }
+        if (document.getElementById('automatemp__warehouses-size').checked) {
+          chrome.runtime.sendMessage({ command: 'warehouses-size', id: prodId }, (response) => {
+            if (response.length != 0) {
+              document.querySelector('.automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
               <table class="automatemp__warehouses-table">
                 <tbody class="automatemp__warehouses-table__tbody">
                 </tbody>
               </table>
             `)
-          }
-          let elm = document.querySelector('.automatemp__warehouses-table__tbody');
-          response.forEach(item => {
-            elm.insertAdjacentHTML('beforeend', `
+            }
+            let elm = document.querySelector('.automatemp__warehouses-table__tbody');
+            response.forEach(item => {
+              elm.insertAdjacentHTML('beforeend', `
                 <tr>
                   <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--regular">${item.size}</td>
                   <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--bold">${item.warehouse_name}</td>
                   <td class="automatemp__warehouses-table__tbody-td automatemp__warehouses-table__tbody-td--lite">${item.qty} шт.</td>
                 </tr>
               `)
-          })
-        });
-      }
+            })
+          });
+        }
+      })
+    }
+
+    updateWarehouses(true)
+    waitForElm('#warehousesBlock').then((elm) => {
+      if (window.innerWidth >= 1365.98) moveBlock('normal')
+      if (this.window.innerWidth < 1365.98 && this.window.innerWidth >= 1023.98) moveBlock('medium')
+      if (window.innerWidth < 1023.98) moveBlock('minimum')
     })
+
+
+
+    // Initialize variables
+    let size = '';
+
+    // Detect window size and handle events accordingly
+    window.addEventListener('resize', function () {
+      if (this.window.innerWidth >= 1365.98 && size !== 'normal') {
+        moveBlock('normal');
+      } else if (this.window.innerWidth < 1365.98 && this.window.innerWidth >= 1023.98 && size !== 'medium') {
+        moveBlock('medium');
+      } else if (this.window.innerWidth < 1023.98 && size !== 'minimum') {
+        moveBlock('minimum');
+      }
+    });
+
+    // Move block to corresponding location based on the window size
+    function moveBlock(newSize) {
+      const block = document.querySelector('#warehousesBlock');
+      let copy = '';
+
+      if (newSize === 'normal') {
+        copy = block.cloneNode(true);
+        copy.classList.remove('resizeToMedium');
+        copy.classList.remove('resizeToMinimum');
+        copy.classList.add('resizeToNormal');
+        document.querySelector('.product-page__aside-container').appendChild(copy);
+      } else if (newSize === 'medium') {
+        copy = block.cloneNode(true);
+        copy.classList.remove('resizeToNormal');
+        copy.classList.remove('resizeToMinimum');
+        copy.classList.add('resizeToMedium');
+        document.querySelector('.product-page__order').appendChild(copy);
+      } else if (newSize === 'minimum') {
+        copy = block.cloneNode(true);
+        copy.classList.remove('resizeToNormal');
+        copy.classList.remove('resizeToMedium');
+        copy.classList.add('resizeToMinimum');
+        const betweenBlock = document.querySelector('.product-page__delivery-advantages');
+        const afterBlock = document.querySelector('.product-page__seller-wrap');
+        betweenBlock.parentNode.insertBefore(copy, afterBlock);
+      }
+
+      block.parentElement.removeChild(block);
+      size = newSize;
+      updateWarehouses(false);
+    }
+
+
   }
 }
 
@@ -1052,10 +1219,6 @@ function fillFeedbacks() {
   }
 }
 
-document.body.addEventListener('wheel', (event) => {
-  event.wheelDeltaY < 0 ? fillPromos(true) : null;
-})
-
 function clearData() {
   currentUrl = window.location.href;
   if (
@@ -1074,15 +1237,30 @@ function clearData() {
     el.parentNode.removeChild(el);
   } else if (currentUrl.includes('detail.aspx')) {
     cpmData.length = 0;
-    let el = document.getElementById('automatempBlock__card__block');
-    el.parentNode.removeChild(el);
-    let el2 = document.getElementById('autmatemp__unitEconom__block');
-    el2.parentNode.removeChild(el2);
+    const removeElement = (id) => {
+      let el = document.getElementById(id);
+      if (el) {
+        el.remove();
+        console.log(`Элемент с id "${id}" был удален`);
+      } else {
+        console.log(`Элемент с id "${id}" не найден`);
+      }
+    };
+
+    removeElement('automatempBlock__card__block');
+    removeElement('autmatemp__unitEconom__block');
+    removeElement('warehousesBlock');
   } else if (currentUrl.includes('feedbacks')) {
     feedbacks.length = 0;
 
   }
 }
+
+document.body.addEventListener('wheel', (event) => {
+  event.wheelDeltaY < 0 ? fillPromos(true) : null;
+})
+
+
 
 
 // https://www.wildberries.ru/catalog/130757167/detail.aspx?targetUrl=SG

@@ -826,6 +826,10 @@ details[open]>summary:after {
   height: 37px;
 }
 
+.automatemp__warehouses-details:last-child .btn-base {
+  margin-bottom: 40px;
+}
+
 .automatemp__warehouses-radio input {
   width: auto;
   height: 100%;
@@ -873,7 +877,7 @@ details[open]>summary:after {
   border-bottom: 1px solid #E8E8E8;
 }
 
-.automatemp__warehouses-table__tbody tr:last-child{
+.automatemp__warehouses-table__tbody tr:last-child {
   border-bottom: none;
   margin-bottom: 0;
 }
@@ -901,4 +905,255 @@ details[open]>summary:after {
 .automatemp__warehouses-table__tbody-td--lite {
   font-weight: 510;
   color: #919191;
+}
+
+#warehousesBlock details+details {
+  margin-top: 20px;
+}
+
+.automatemp__warehouses-content__box {
+  display: flex;
+  justify-content: space-between;
+}
+
+.automatemp__warehouses-input {
+  background: #F1F1F5;
+  border-radius: 5px;
+  width: 300px;
+  height: 39px;
+  padding-left: 10px;
+  padding-right: 20px;
+  margin-bottom: 20px;
+}
+
+.automatemp__warehouses-input:hover {
+  background-color: #E8E8EF;
+}
+
+.automatemp__warehouses-input:focus {
+  background-color: #fff;
+  border: 1px solid #BA2CA6;
+}
+
+.automatemp__warehouses-input::placeholder {
+  color: #B9B9C0;
+}
+
+.automatemp__warehouses-select {
+  max-width: 163px;
+  max-height: 39px;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.number-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 108px;
+  height: 39px;
+  font-size: 14px;
+  border: none;
+}
+
+.number-input button {
+  width: 32px;
+  height: 32px;
+  font-size: 24px;
+  line-height: 0;
+  border: none;
+  background: #F1F1F5;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  transition: all .2s ease-in-out;
+  user-select: none;
+  position: relative;
+}
+
+.number-input button:hover {
+  background-color: #ddd;
+}
+
+.number-input button:before {
+  content: "";
+  position: absolute;
+  line-height: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.number-input button:nth-child(1):before {
+  content: "-";
+}
+
+.number-input button.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.number-input button.disabled:before {
+  content: "disabled";
+}
+
+.number-input button:nth-child(3):before {
+  content: "+";
+}
+
+.number-input input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  width: 40px;
+  height: 100%;
+  font-size: 24px;
+  padding-right: 4px;
+  padding-left: 4px;
+  border: none;
+  background-color: #fff;
+  text-align: center;
+  outline: none;
+  user-select: none;
+}
+
+.automatemp__warehouses-order_btn {
+  margin-top: 20px;
+  width: 100%;
+}
+
+/* -------------------------------------------------------- */
+
+.__select {
+  position: relative;
+  width: 163px;
+  height: 39px;
+}
+
+.__select[data-state=active] .__select__title::before {
+  transform: translate(-3px, -50%) rotate(-45deg);
+}
+
+.__select[data-state=active] .__select__title::after {
+  transform: translate(3px, -50%) rotate(45deg);
+}
+
+.__select[data-state=active] .__select__content {
+  opacity: 1;
+}
+
+.__select[data-state=active] .__select__label+.__select__input+.__select__label {
+  max-height: 40px;
+  border-top-width: 1px;
+}
+
+.__select__title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: solid 1px #D3D4DC;
+  cursor: pointer;
+}
+
+.__select__title:hover {
+  border-color: #868694;
+}
+
+.__select__title::before,
+.__select__title::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  display: block;
+  width: 10px;
+  height: 1.5px;
+  transition: all 0.3s ease-out;
+  background-color: #b9b9c1;
+  transform: translate(-3px, -50%) rotate(45deg);
+}
+
+.__select__title::after {
+  transform: translate(3px, -50%) rotate(-45deg);
+}
+
+.__select__content {
+  margin-top: 14px;
+  padding-top: 10px;
+  position: absolute;
+  top: 40px;
+  left: 3px;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 6px);
+  background-color: #ffffff;
+  transition: all 0.3s ease-out;
+  opacity: 0;
+  z-index: 8;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.__select__input {
+  display: none;
+}
+
+.__select__input:checked+label {
+  color: #cb11ab;
+}
+
+.__select__input:disabled+label {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.__select__label {
+  display: flex;
+  align-items: center;
+  width: 90%;
+  transform: translateX(6%);
+  border-radius: 8px;
+  height: 40px;
+  max-height: 0;
+  padding: 0 16px;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.__select__label:last-child {
+  margin-bottom: 10px;
+}
+
+.__select__label:hover {
+  background-color: #F6F6F9 !important;
+}
+
+.resizeToMedium {
+  max-width: 292px;
+}
+
+.resizeToMinimum .automatemp__warehouses-summary::after{
+  content: "+";
+  border: none;
+  width: 20px;
+  height: 20px;
+  transform: rotate(0);
+  line-height: 0;
+}
+
+.resizeToMinimum .automatemp__warehouses-details[open]>.automatemp__warehouses-summary::after{
+  transform: rotate(45deg);
+}
+
+.resizeToMinimum .automatemp__warehouses-wrapper{
+  max-width: 300px;
 }
