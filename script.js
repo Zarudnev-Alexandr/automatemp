@@ -20,13 +20,7 @@ document.addEventListener('DOMContentLoaded', chrome.runtime.sendMessage({ comma
 function getData() {
   currentUrl = window.location.href;
   if (currentUrl.includes('search=')) {
-    let searchTextBegin = currentUrl.search('search=');
-    let searchTextEnd = currentUrl.indexOf('#', searchTextBegin);
-    let searchTextEnd2 = searchTextEnd === -1 ? currentUrl.indexOf('#', searchTextBegin) : null;
-    searchText = searchTextEnd2 === -1 ? currentUrl.slice(searchTextBegin + 7) : currentUrl.slice(searchTextBegin + 7, searchTextEnd);
-    searchText = searchText.replaceAll('+', '%20');
-    searchText = decodeURI(searchText);
-    chrome.runtime.sendMessage({ command: 'getRequests', text: searchText }, (response) => { })
+    chrome.runtime.sendMessage({ command: 'getRequests', text: getFromSearch() }, (response) => { })
   } else if (currentUrl.includes('wildberries.ru/catalog') && currentUrl.includes('detail.aspx')) {
     var prodId;
     waitForElm('#productNmId').then((elm) => {
@@ -52,9 +46,20 @@ function getData() {
       fillWarehouses(true);
     })
 
+    waitForElm('.product-order-quantity').then((elm) => {
+      fillReleaseData(elm);
+    })
+
+    waitForElm('.user-activity__tabs').then(elm => {
+      fillAddQuestion(elm);
+    })
+
   } else if (currentUrl.includes('wildberries.ru/catalog') && currentUrl.includes('feedbacks')) {//Отзывы
     let prodId = currentUrl.split('/')[4]
     chrome.runtime.sendMessage({ command: 'feedbacks', id: prodId });
+  } else if (currentUrl.includes('wildberries.ru/brands')) {
+    console.log('Бренды');
+    fillLikesOnBrand();
   }
 }
 
@@ -123,47 +128,23 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponce) {
   }
 });
 
-//   // waitForElm():
-//   // Код waitForElm(selector) представляет собой функцию, которая используется для ожидания загрузки элемента на странице. Функция возвращает объект обещания (Promise), который будет разрешен, когда элемент, соответствующий заданному селектору, будет найден на странице.
-
-//   // Первая вещь, которую делает функция, это создает новый объект обещания с помощью конструктора Promise. Это означает, что функция возвращает обещание, которое будет разрешено позже, когда элемент будет найден.
-
-//   // Затем функция проверяет, есть ли элемент на странице, соответствующий заданному селектору, с помощью метода document.querySelector(selector). Если элемент уже есть на странице, функция немедленно разрешает обещание с найденным элементом.
-
-//   // Если элемент не найден, функция создает новый объект MutationObserver, который следит за изменениями в дереве DOM. Затем функция добавляет наблюдателя на document.body, чтобы отслеживать изменения в дереве DOM.
-
-//   // Когда элемент, соответствующий заданному селектору, будет добавлен на страницу, функция разрешит обещание с найденным элементом и отключит наблюдателя, чтобы предотвратить дальнейшее отслеживание изменений в дереве DOM.
-
-//   // Итак, в целом, функция waitForElm(selector) используется для ожидания загрузки элемента на странице и возвращает объект обещания, который будет разрешен, когда элемент будет найден на странице. Это может быть полезно, например, когда вы хотите выполнить какой-то код, только когда элемент на странице доступен для использования.
-//   // ```
-function waitForElm(selector) {
-  return new Promise((resolve) => {
-    if (document.querySelector(selector)) {
-      return resolve(document.querySelector(selector));
-    }
-    const observer = new MutationObserver((mutations) => {
-      if (document.querySelector(selector)) {
-        resolve(document.querySelector(selector));
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
-  });
-}
-
-function declOfNum(number, words) {
-  return words[(number % 100 > 4 && number % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(number % 10 < 5) ? Math.abs(number) % 10 : 5]];
-}
+//==================================
+//Главная страница WB---------------
+//==================================
 
 function fillPage() {//Основная страница (10 карточек товаров и аукцион)
   if (jsonSearchData.length != 0 && jsonSearchSpecificData.length != 0 && tableCardsData.length != 0 && priorityCategoriesData.length != 0 && timeInfoData.length != 0) {
+    console.log('fillpage');
+
     waitForElm('.catalog-page__searching-results').then((elm) => {
       elm.insertAdjacentHTML(
         'beforeend',
         `
+        <div class="automatemp__countRequest">
+          <div class="automatemp__countRequest-items">
+          </div>
+        </div>
+
         <div class="automatempBlock" id="automatempBlock">
           <div class="automatempBlock__inner">
             <div class="automatempBlock__logoButton">
@@ -181,6 +162,27 @@ function fillPage() {//Основная страница (10 карточек т
         </div>
       `
       );
+
+      chrome.runtime.sendMessage({ command: 'countRequest', query: getFromSearch() }, (response) => {
+        if (response.length != 0) {
+          response.forEach(item => {
+            document.querySelector(".automatemp__countRequest-items").insertAdjacentHTML('beforeend', `
+              <div class="automatemp__countRequest-item">
+                <div class="automatemp__countRequest-item__titlebox">
+                  <h4 class="automatemp__countRequest-item__title">${new Intl.NumberFormat('ru-RU').format(item.frequency)}</h4>
+                  <img class="automatemp__countRequest-item__img" src="${item.diff > 0 ?
+                "https://4947.ru/wb_extension/images/season_arrow_up.svg" : (item.diff < 0 ?
+                  "https://4947.ru/wb_extension/images/season_arrow_down.svg" : "")}"/>
+                  <h4 class="automatemp__countRequest-item__diff">${item.diff != 0 ? Math.abs(item.diff) + " %" : "-"}</h4>
+                </div>
+                <p class="automatemp__countRequest-item__period">${item.date_type == "week" ? "запросов за неделю" :
+                (item.date_type == "month" ? "запросов за мес." : "запросов за 3 мес.")}</p>
+              </div>
+            `)
+          })
+        }
+      });
+
       // Скрытие и показ основного блока
       document.querySelector('#wholeAuction__id').addEventListener('click', function () {
         document.querySelector('#categoryPriorityId').classList.toggle('hide');
@@ -356,30 +358,11 @@ function fillPage() {//Основная страница (10 карточек т
   }
 }
 
-function fillCardPage() {
-  if (cpmData.length !== 0) {
-    waitForElm('.product-page__goods-slider--promo').then((elm) => {
-      elm.insertAdjacentHTML('beforebegin', `
-        <div class="automatempBlock__card__block" id="automatempBlock__card__block">
-          <div class="automatempBlock__card__inner">
-            <h6 class="automatempBlock__card__title">Рекламные ставки</h6>
-            <ul class="automatempBlock__card__list" id="automatempBlock__card__list">
-            </ul>
-          </div>
-        </div>
-      `)
-    })
-    waitForElm('#automatempBlock__card__list').then((elm) => {
-      cpmData.forEach((item, index) => {
-        elm.insertAdjacentHTML('beforeend', `
-          <li class="automatempBlock__card__list__item">${index + 1} - ${new Intl.NumberFormat('ru-RU').format(item.cpm)} ₽</li>
-        `)
-      });
-    })
-  }
-}
+//==================================
+//Страница товара-------------------
+//==================================
 
-function unitEconomFillPage() {
+function unitEconomFillPage() {//Юнит экономика
   if (size.length !== 0 && commissions.length !== 0 && wareHouses.length !== 0 && logistic.length !== 0) {
     waitForElm('.product-page__details-section').then((elm) => {
       elm.insertAdjacentHTML('beforeend', `
@@ -480,9 +463,9 @@ function unitEconomFillPage() {
 
 
                 <h3 class="product-params__caption automatemp__unitEconom__table__title">Логистика, хранение и приёмка *</h3>
-                <select class="automatemp__unitEconom__select automatemp__unitEconom__select-unit" id="#automatemp__unitEconom__select">
-
+                <select class="automatemp__unitEconom__select automatemp__unitEconom__select-unit" id="automatemp__unitEconom__select">
                 </select>
+
                 <table class="product-params__table automatemp__logistic__table">
                   <tbody class="automatemp__logistic__table__tbody">
                     <tr class="product-params__row">
@@ -522,12 +505,45 @@ function unitEconomFillPage() {
                         </span>
                       </th>
                       <td class="product-params__cell">
-                        <span id="automatemp__logistic__table__reception">${logistic.reception > 0 ? `x${logistic.reception}` : logistic.reception === 0 ? 'бесплатно' : 'недоступно'}</span>
+                        <span id="automatemp__logistic__table__reception">${logistic.reception_amount > 0 ? `x${logistic.reception_amount}` : logistic.reception_amount === 0 ? 'бесплатно' : 'недоступно'}</span>
                       </td>
                     </tr>
                   </tbody>
                 </table>
 
+                <h3 class="product-params__caption automatemp__unitEconom__table__title">Расчеты</h3>
+                <form class="automatemp__unitEconom-calcForm">
+                  <select class="automatemp__unitEconom__select automatemp__unitEconom__select-delivery_type" id="#automatemp__unitEconom__select-delivery_type" size="1">
+                    <option value="fbo">FBO</option>
+                  </select>
+                  <div class="automatemp__unitEconom-input__box">
+                    <input class="automatemp__unitEconom-input" type="float" id="automatemp__unitEconom-input__purchase_price" placeholder="Цена закупки, ₽">
+                  </div>
+                  <div class="automatemp__unitEconom-input__box">
+                    <input class="automatemp__unitEconom-input" type="float" id="automatemp__unitEconom-input__additional" placeholder="Доп. (упаковка, этикетки, ФФ), ₽">
+                  </div>
+                  <div class="automatemp__unitEconom-input__box">
+                    <input class="automatemp__unitEconom-input" type="float" id="automatemp__unitEconom-input__logistic_to_mp" placeholder="Логистика до МП, ₽">
+                  </div>
+                  <div class="automatemp__unitEconom-input__box">
+                    <input class="automatemp__unitEconom-input" type="float" id="automatemp__unitEconom-input__wrap_days" placeholder="Оборачиваемость, дн">
+                  </div>
+                  <div class="automatemp__unitEconom-input__box">
+                    <input class="automatemp__unitEconom-input" type="int" id="automatemp__unitEconom-input__redemtion_percent" placeholder="Процент выкупа, %">
+                  </div>
+                  <div class="automatemp__unitEconom-input__box">
+                    <input class="automatemp__unitEconom-input" type="int" id="automatemp__unitEconom-input__merriage_percent" placeholder="Процент брака, %">
+                  </div>
+                  <div class="automatemp__unitEconom-input__box">
+                    <input class="automatemp__unitEconom-input" type="int" id="automatemp__unitEconom-input__tax_rate" placeholder="Налоговая ставка, %">
+                  </div>
+                  <div class="automatemp__unitEconom-input__box">
+                    <input class="automatemp__unitEconom-input" type="int" id="automatemp__unitEconom-input__profit_target" placeholder="Цель по прибыли, ₽">
+                  </div>
+                  <button class="btn-base automatemp__unitEconom-calculation__submit" type="submit">
+                    Посчитать
+                  </button>
+                </form>                
               </div>
             </div>
             <div class="collapsible__bottom">
@@ -563,8 +579,12 @@ function unitEconomFillPage() {
 
   waitForElm('.automatemp__unitEconom__select-unit').then((elm) => {
     var selectString = '';
-    wareHouses.forEach(item => {
-      selectString += `<option value="${item.id}">${item.name}</option>`;
+    wareHouses.forEach((item, index) => {
+      if (index === 0) {
+        selectString += `<option value="${item.id}" selected>${item.name}</option>`;
+      } else {
+        selectString += `<option value="${item.id}">${item.name}</option>`;
+      }
     });
     [...document.getElementsByClassName('automatemp__unitEconom__select-unit')].forEach(elem => {
       elem.insertAdjacentHTML('beforeend', selectString);
@@ -580,18 +600,131 @@ function unitEconomFillPage() {
       })
     });
   })
+
+  waitForElm('.automatemp__unitEconom-calcForm').then(elm => {
+    elm.addEventListener('submit', function (event) {
+      event.preventDefault(); // Предотвращаем отправку формы
+      let elm = document.querySelector('.automatemp__unitEconom-calcForm__table')
+      if (elm) {
+        console.log(elm);
+        elm.remove()
+      }
+      fillUnitCalc()
+    });
+  })
+
+  function fillUnitCalc() {
+    const deliveryTypeSelect = document.querySelector('.automatemp__unitEconom__select-delivery_type');
+    const deliveryTypeOptions = Array.from(deliveryTypeSelect.selectedOptions, option => option.value);
+
+    const warehouseSelect = document.querySelector('#automatemp__unitEconom__select');
+    const warehouseOptions = Array.from(warehouseSelect.selectedOptions, option => option.value);
+
+    var input1 = document.getElementById('automatemp__unitEconom-input__purchase_price').value;
+    var input2 = document.getElementById('automatemp__unitEconom-input__additional').value;
+    var input3 = document.getElementById('automatemp__unitEconom-input__logistic_to_mp').value;
+    var input4 = document.getElementById('automatemp__unitEconom-input__wrap_days').value;
+    var input5 = document.getElementById('automatemp__unitEconom-input__redemtion_percent').value;
+    var input6 = document.getElementById('automatemp__unitEconom-input__merriage_percent').value;
+    var input7 = document.getElementById('automatemp__unitEconom-input__tax_rate').value;
+    var input8 = document.getElementById('automatemp__unitEconom-input__profit_target').value;
+
+    // Формируем данные для отправки на сервер
+    var data = {
+      delivery_type: deliveryTypeOptions[0],
+      warehouse_id: parseInt(warehouseOptions[0]),
+      purchase_price: parseFloat(input1),
+      additional: parseFloat(input2),
+      logistic_to_mp: parseFloat(input3),
+      wrap_days: parseInt(input4),
+      redemtion_percent: parseInt(input5),
+      merriage_percent: parseInt(input6),
+      tax_rate: parseInt(input7),
+      profit_target: parseInt(input8),
+    };
+
+    let prodId = document.getElementById('productNmId').innerText;
+
+    chrome.runtime.sendMessage({ command: 'unitCalculateRequest', id: prodId, data: data }, (response) => {
+      if (response.length != 0) {
+        document.querySelector(".automatemp__unitEconom-calcForm").insertAdjacentHTML('afterend', `
+          <table class="product-params__table automatemp__unitEconom-calcForm__table">
+            <caption data-jsv="#346^#159_" class="product-params__caption">Результаты</caption>
+            <tbody data-jsv="/159_/346^" data-jsv-df="">
+              <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                <th class="product-params__cell">
+                  <span class="product-params__cell-decor">
+                    <span>Маржинальность</span>
+                  </span>
+                </th>
+                <td class="product-params__cell">
+                  <span id="unitSpan__result-margin">${response.margin_percent} % - ${response.margin} ₽</span>
+                </td>
+              </tr>
+              <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                <th class="product-params__cell">
+                  <span class="product-params__cell-decor">
+                    <span>Рентабельность</span>
+                  </span>
+                </th>
+                <td class="product-params__cell">
+                  <span id="unitSpan__result-profitability">${response.profitability} %</span>
+                </td>
+              </tr>
+              <tr data-jsv="#395^#160_#161_" class="product-params__row">
+                <th class="product-params__cell">
+                  <span class="product-params__cell-decor">
+                    <span>Для достижения цели нужно продать</span>
+                  </span>
+                </th>
+                <td class="product-params__cell">
+                  <span id="unitSpan__result-profitTarget">${response.profit_target.quantity} шт. 
+                  (в день ${response.profit_target.day_quantity} шт.)</span>
+                </td>
+              </tr>                    
+            </tbody>
+          </table>
+        `)
+      }
+    });
+  }
+
+
 }
 
-function rewriteLogistic() {
+function rewriteLogistic() {//Перезапись логистики в юнит экономике
   waitForElm('.automatemp__logistic__table').then((elm) => {
     document.getElementById('automatemp__logistic__table__amount').innerHTML = `${logistic.logistic_amount} ₽`
     document.getElementById('automatemp__logistic__table__from_client').innerHTML = `${logistic.from_client} ₽`
     document.getElementById('automatemp__logistic__table__storage_amount').innerHTML = `${logistic.storage_amount} ₽ в день`
-    document.getElementById('automatemp__logistic__table__reception').innerHTML = `${logistic.reception > 0 ? `x${logistic.reception}` : logistic.reception === 0 ? 'бесплатно' : 'недоступно'}`
+    document.getElementById('automatemp__logistic__table__reception').innerHTML = `${logistic.reception_amount > 0 ? `x${logistic.reception_amount}` : logistic.reception_amount === 0 ? 'бесплатно' : 'недоступно'}`
   })
 }
 
-function fillCertificate() {
+function fillCardPage() {//Блок с рекламными ставками промотовара
+  if (cpmData.length !== 0) {
+    waitForElm('.product-page__goods-slider--promo').then((elm) => {
+      elm.insertAdjacentHTML('beforebegin', `
+        <div class="automatempBlock__card__block" id="automatempBlock__card__block">
+          <div class="automatempBlock__card__inner">
+            <h6 class="automatempBlock__card__title">Рекламные ставки</h6>
+            <ul class="automatempBlock__card__list" id="automatempBlock__card__list">
+            </ul>
+          </div>
+        </div>
+      `)
+    })
+    waitForElm('#automatempBlock__card__list').then((elm) => {
+      cpmData.forEach((item, index) => {
+        elm.insertAdjacentHTML('beforeend', `
+          <li class="automatempBlock__card__list__item">${index + 1} - ${new Intl.NumberFormat('ru-RU').format(item.cpm)} ₽</li>
+        `)
+      });
+    })
+  }
+}
+
+function fillCertificate() {//Заполнение сертификата товара
   if (document.querySelectorAll('#automatempSertif').length === 0) document.querySelector('.certificate-check').insertAdjacentHTML('beforeend', `
     <div class="automatempSertif" id="automatempSertif">
       <button class="btn-base">Заказать сертификацию</button>
@@ -732,16 +865,16 @@ function fillCertificate() {
 
 }
 
-function modalVisible() {
+function modalVisible() {//Открывает модальное окно сертификата
   document.getElementById('automatemp-modalCert').style.display = 'block';
 }
 
-function modalOut() {
+function modalOut() {//Закрывает модальное окно сертификата
   document.getElementById('automatemp-modalCert').style.display = 'none';
   document.removeEventListener('click', clickOutsidePopUp);
 }
 
-function clickOutsidePopUp(event) {
+function clickOutsidePopUp(event) {//Проверка на клик вне модального окла сертификата
   const modal = document.querySelector('.automatemp-modalCert_content');
   const isClickInsideModal = modal.contains(event.target);
   if (!isClickInsideModal) {
@@ -749,7 +882,20 @@ function clickOutsidePopUp(event) {
   }
 }
 
-function fillWarehouses(updatePage) {
+function fillReleaseData(elm) {//Вывод даты появления товара
+  let prodId = document.getElementById('productNmId').innerText;
+  chrome.runtime.sendMessage({ command: 'releaseDate', id: prodId }, (response) => {
+    if (response.length != 0) {
+      date = new Date(response);
+      let formattedDate = `${date.getDate()}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
+      elm.insertAdjacentHTML('afterend', `
+        <p class="automatemp__releaseDate" id="automatemp__releaseDate">Дата появления: ${formattedDate}</p>
+      `)
+    }
+  });
+}
+
+function fillWarehouses(updatePage) {//Блок со складами на странице товара
   //Проверка на то, что блока со складами на странице нет. Если проверка прошла, то создаем этот блок
   if (document.querySelectorAll('#warehousesBlock').length == 0) {
     document.querySelector('.product-page__aside-container').insertAdjacentHTML('beforeend', `
@@ -798,8 +944,8 @@ function fillWarehouses(updatePage) {
             <button class="btn-base automatemp__warehouses-order_btn">Заказать</button>                        
           </div>
         </details>
-        <details class="automatemp__warehouses-details">
-          <summary class="automatemp__warehouses-summary">В корзину</summary>
+        <details class="automatemp__warehouses-details automatemp__warehouses-details__last">
+          <summary class="automatemp__warehouses-summary ">В корзину</summary>
           <div class="automatemp__warehouses-wrapper">
             <input class="automatemp__warehouses-input" type="text", id="automatemp__warehouses-input__favorites" placeholder="Поисковый запрос"/>
             <div class="automatemp__warehouses-content__box">
@@ -1000,45 +1146,10 @@ function fillWarehouses(updatePage) {
       size = newSize;
       updateWarehouses(false);
     }
-
-
   }
 }
 
-function ImgLinkSlice(nmId) {
-  const nm = parseInt(nmId, 10),
-    vol = ~~(nm / 1e5),
-    part = ~~(nm / 1e3);
-
-  const host =
-    vol >= 0 && vol <= 143
-      ? '//basket-01.wb.ru'
-      : vol >= 144 && vol <= 287
-        ? '//basket-02.wb.ru'
-        : vol >= 288 && vol <= 431
-          ? '//basket-03.wb.ru'
-          : vol >= 432 && vol <= 719
-            ? '//basket-04.wb.ru'
-            : vol >= 720 && vol <= 1007
-              ? '//basket-05.wb.ru'
-              : vol >= 1008 && vol <= 1061
-                ? '//basket-06.wb.ru'
-                : vol >= 1062 && vol <= 1115
-                  ? '//basket-07.wb.ru'
-                  : vol >= 1116 && vol <= 1169
-                    ? '//basket-08.wb.ru'
-                    : vol >= 1170 && vol <= 1313
-                      ? '//basket-09.wb.ru'
-                      : vol >= 1314 && vol <= 1601
-                        ? '//basket-10.wb.ru'
-                        : vol >= 1602 && vol <= 1655
-                          ? '//basket-11.wb.ru'
-                          : '//basket-12.wb.ru';
-
-  return `${host}/vol${vol}/part${part}/${nm}`;
-}
-
-function fillPromos(wheel) {
+function fillPromos(wheel) {//Отрисовка цены на карточках промотоваров. Плохо работает после обновлений
   var cards = [...document.getElementsByClassName('product-card__main j-card-link')];
   if (wheel && cards.length > 10) {
     cards = [...document.getElementsByClassName('product-card__main j-card-link')].splice(cards.length - 10);
@@ -1055,7 +1166,64 @@ function fillPromos(wheel) {
   }
 }
 
-function fillFeedbacks() {
+function fillAddQuestion(elm) {//Модальное окно с добавлением отзыва
+  elm.insertAdjacentHTML('beforeend', `
+    <details class="automatemp__warehouses-details automatemp__warehouses-details__warehouses searchModal__detail searchModal__detail-addQuestion">
+      <summary class="automatemp__warehouses-summary searchModal__summary">
+        <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
+        <h2 class="searchModal__summary-title">Добавить вопрос</h2>
+      </summary>
+      ${searchModal('productQuestions')}
+    </details>
+  `)
+
+  // updateWarehouses(true)
+  waitForElm('.searchModal__detail-addQuestion').then((elm) => {
+    if (window.innerWidth >= 1023.98) moveBlock('normal')
+    if (window.innerWidth < 1023.98) moveBlock('minimum')
+  })
+
+  // Initialize variables
+  let size = '';
+
+  // Detect window size and handle events accordingly
+  window.addEventListener('resize', function () {
+    if (this.window.innerWidth >= 1023.98 && size !== 'normal') {
+      moveBlock('normal');
+    } else if (this.window.innerWidth < 1023.98 && size !== 'minimum') {
+      moveBlock('minimum');
+    }
+  });
+
+  // Move block to corresponding location based on the window size
+  function moveBlock(newSize) {
+    const block = document.querySelector('.searchModal__detail-addQuestion');
+    let copy = '';
+
+    if (newSize === 'normal') {
+      copy = block.cloneNode(true);
+      copy.classList.remove('resizeToMinimum');
+      copy.classList.add('resizeToNormal');
+      document.querySelector('.user-activity__tabs').insertAdjacentElement('beforeend', copy)
+    } else if (newSize === 'minimum') {
+      copy = block.cloneNode(true);
+      copy.classList.remove('resizeToNormal');
+      copy.classList.add('resizeToMinimum');
+      const editor = document.querySelector('.user-activity__tabs-wrap');
+      editor.insertAdjacentElement('afterend', copy);
+    }
+
+    block.parentElement.removeChild(block);
+    size = newSize;
+    // updateWarehouses(false);
+  }
+}
+
+//==================================
+//Страница отзывов------------------
+//==================================
+
+function fillFeedbacks() {//Калькулятор оценок в отзывах
   if (feedbacks.length != 0) {
 
     function feedbackCalcFunc() {
@@ -1219,40 +1387,223 @@ function fillFeedbacks() {
   }
 }
 
-function clearData() {
-  currentUrl = window.location.href;
-  if (
-    currentUrl.includes('wildberries.ru/catalog') &&
-    currentUrl.includes('search.aspx')
-  ) {
-    jsonSearchData.length = 0;
-    jsonSearchSpecificData.length = 0;
-    tableCardsData.length = 0;
-    commissions.length = 0;
-    wareHouses.length = 0;
-    size.length = 0;
-    priorityCategoriesData.length = 0;
-    logistic.length = 0
-    let el = document.getElementById('automatempBlock');
-    el.parentNode.removeChild(el);
-  } else if (currentUrl.includes('detail.aspx')) {
-    cpmData.length = 0;
-    const removeElement = (id) => {
-      let el = document.getElementById(id);
-      if (el) {
-        el.remove();
-        console.log(`Элемент с id "${id}" был удален`);
+//==================================
+//Страница бренда-------------------
+//==================================
+
+function fillLikesOnBrand() {//Модальное окно с накруткой лайков на бренд
+  waitForElm('.brand-header__like').then(elm => {
+    elm.insertAdjacentHTML('afterbegin', `
+      <details class="automatemp__warehouses-details automatemp__warehouses-details__warehouses searchModal__detail">
+        <summary class="automatemp__warehouses-summary searchModal__summary">
+          <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
+          <h2 class="searchModal__summary-title">Добавить лайки</h2>
+        </summary>
+        ${searchModal('brandMainLikes')}
+      </details>
+    `)
+  })
+}
+
+//==================================
+//Вспомогательные функции-----------
+//==================================
+
+function getFromSearch() {//Выборка поиского запроса клиента
+  let searchTextBegin = currentUrl.search('search=');
+  let searchTextEnd = currentUrl.indexOf('#', searchTextBegin);
+  let searchTextEnd2 = searchTextEnd === -1 ? currentUrl.indexOf('#', searchTextBegin) : null;
+  searchText = searchTextEnd2 === -1 ? currentUrl.slice(searchTextBegin + 7) : currentUrl.slice(searchTextBegin + 7, searchTextEnd);
+  searchText = searchText.replaceAll('+', '%20');
+  searchText = decodeURI(searchText);
+  return searchText
+}
+
+function declOfNum(number, words) {//Правильный падеж слова
+  return words[(number % 100 > 4 && number % 100 < 20) ? 2 : [2, 0, 1, 1, 1, 2][(number % 10 < 5) ? Math.abs(number) % 10 : 5]];
+}
+
+//   // waitForElm():
+//   // Код waitForElm(selector) представляет собой функцию, которая используется для ожидания загрузки элемента на странице. Функция возвращает объект обещания (Promise), который будет разрешен, когда элемент, соответствующий заданному селектору, будет найден на странице.
+
+//   // Первая вещь, которую делает функция, это создает новый объект обещания с помощью конструктора Promise. Это означает, что функция возвращает обещание, которое будет разрешено позже, когда элемент будет найден.
+
+//   // Затем функция проверяет, есть ли элемент на странице, соответствующий заданному селектору, с помощью метода document.querySelector(selector). Если элемент уже есть на странице, функция немедленно разрешает обещание с найденным элементом.
+
+//   // Если элемент не найден, функция создает новый объект MutationObserver, который следит за изменениями в дереве DOM. Затем функция добавляет наблюдателя на document.body, чтобы отслеживать изменения в дереве DOM.
+
+//   // Когда элемент, соответствующий заданному селектору, будет добавлен на страницу, функция разрешит обещание с найденным элементом и отключит наблюдателя, чтобы предотвратить дальнейшее отслеживание изменений в дереве DOM.
+
+//   // Итак, в целом, функция waitForElm(selector) используется для ожидания загрузки элемента на странице и возвращает объект обещания, который будет разрешен, когда элемент будет найден на странице. Это может быть полезно, например, когда вы хотите выполнить какой-то код, только когда элемент на странице доступен для использования.
+//   // ```
+function waitForElm(selector) {//Важнейшая функция, описание выше
+  return new Promise((resolve) => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
+    const observer = new MutationObserver((mutations) => {
+      if (document.querySelector(selector)) {
+        resolve(document.querySelector(selector));
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  });
+}
+
+function searchModal(name) {//Заготовка для модалки с запросом
+  newElm =
+    `
+      <div class="automatemp__warehouses-wrapper searchModal searchModal__${name}">
+        <input class="automatemp__warehouses-input" type="text", id="automatemp__warehouses-input__${name}" placeholder="Поисковый запрос"/>
+        <div class="automatemp__warehouses-content__box">
+          <form>
+            <div class="__select __select-${name}" data-state="">
+              <div class="__select__title __select__title-${name}" data-default="3 часа">3 часа</div>
+              <div class="__select__content __select__content-${name}">
+                <input id="${name}-1" class="__select__input" type="radio" name="${name}Select" />
+                <label for="${name}-1" class="__select__label __select__label-${name}">3 часа</label>
+                <input id="${name}0" class="__select__input" type="radio" name="${name}Select" checked />
+                <label for="${name}0" class="__select__label __select__label-${name}">3 часа</label>
+                <input id="${name}1" class="__select__input" type="radio" name="${name}Select" />
+                <label for="${name}1" class="__select__label __select__label-${name}">12 часов</label>
+                <input id="${name}2" class="__select__input" type="radio" name="${name}Select" />
+                <label for="${name}2" class="__select__label __select__label-${name}">1 день</label>
+                <input id="${name}3" class="__select__input" type="radio" name="${name}Select" />
+                <label for="${name}3" class="__select__label __select__label-${name}">3 дня</label>
+                <input id="${name}4" class="__select__input" type="radio" name="${name}Select" />
+                <label for="${name}4" class="__select__label __select__label-${name}">7 дней</label>
+                <input id="${name}5" class="__select__input" type="radio" name="${name}Select" />
+                <label for="${name}5" class="__select__label __select__label-${name}">14 дней</label>
+              </div>
+            </div>
+          </form>
+          <div class="number-input">
+            <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()"></button>
+            <input class="quantity" min="0" name="quantity" value="0" type="number">
+            <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()"></button>
+          </div>
+        </div>
+        <button class="btn-base automatemp__warehouses-order_btn">Заказать</button>
+      </div>
+    `
+  waitForElm(`.searchModal__${name}`).then(elm => {
+    const selectSingle = document.querySelector(`.__select-${name}`);
+    const selectSingle_title = selectSingle.querySelector(`.__select__title-${name}`);
+    const selectSingle_labels = selectSingle.querySelectorAll(`.__select__label-${name}`);
+    // Toggle menu
+    selectSingle_title.addEventListener('click', () => {
+      if ('active' === selectSingle.getAttribute('data-state')) {
+        selectSingle.setAttribute('data-state', '');
       } else {
-        console.log(`Элемент с id "${id}" не найден`);
+        selectSingle.setAttribute('data-state', 'active');
+      }
+    });
+    // Close when click to option
+    for (let i = 0; i < selectSingle_labels.length; i++) {
+      selectSingle_labels[i].addEventListener('click', (evt) => {
+        selectSingle_title.textContent = evt.target.textContent;
+        selectSingle.setAttribute('data-state', '');
+      });
+    }
+  })
+  return (
+    newElm
+  )
+}
+
+function ImgLinkSlice(nmId) {//Генерирование правильной ссылки на картинку товара WB
+  const nm = parseInt(nmId, 10),
+    vol = ~~(nm / 1e5),
+    part = ~~(nm / 1e3);
+
+  const host =
+    vol >= 0 && vol <= 143
+      ? '//basket-01.wb.ru'
+      : vol >= 144 && vol <= 287
+        ? '//basket-02.wb.ru'
+        : vol >= 288 && vol <= 431
+          ? '//basket-03.wb.ru'
+          : vol >= 432 && vol <= 719
+            ? '//basket-04.wb.ru'
+            : vol >= 720 && vol <= 1007
+              ? '//basket-05.wb.ru'
+              : vol >= 1008 && vol <= 1061
+                ? '//basket-06.wb.ru'
+                : vol >= 1062 && vol <= 1115
+                  ? '//basket-07.wb.ru'
+                  : vol >= 1116 && vol <= 1169
+                    ? '//basket-08.wb.ru'
+                    : vol >= 1170 && vol <= 1313
+                      ? '//basket-09.wb.ru'
+                      : vol >= 1314 && vol <= 1601
+                        ? '//basket-10.wb.ru'
+                        : vol >= 1602 && vol <= 1655
+                          ? '//basket-11.wb.ru'
+                          : '//basket-12.wb.ru';
+
+  return `${host}/vol${vol}/part${part}/${nm}`;
+}
+
+//==================================
+//Очистка данных--------------------
+//==================================
+
+function clearData() {
+  // Clear data based on the current URL
+  const currentUrl = window.location.href;
+
+  if (currentUrl.includes('wildberries.ru/catalog') &&
+    currentUrl.includes('search.aspx')) {
+    jsonSearchData = [];
+    jsonSearchSpecificData = [];
+    tableCardsData = [];
+    commissions = [];
+    wareHouses = [];
+    size = [];
+    priorityCategoriesData = [];
+    logistic = [];
+
+    const automatempBlock = document.getElementById('automatempBlock');
+    if (automatempBlock) {
+      automatempBlock.parentNode.removeChild(automatempBlock);
+    }
+
+    const countRequest = document.querySelector('.automatemp__countRequest');
+    if (countRequest) {
+      countRequest.remove();
+    }
+
+  } else if (currentUrl.includes('detail.aspx')) {
+    cpmData = [];
+
+    const removeElementById = (id) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.remove();
+        console.log(`Element with id "${id}" was removed`);
+      } else {
+        console.log(`Element with id "${id}" not found`);
       }
     };
 
-    removeElement('automatempBlock__card__block');
-    removeElement('autmatemp__unitEconom__block');
-    removeElement('warehousesBlock');
-  } else if (currentUrl.includes('feedbacks')) {
-    feedbacks.length = 0;
+    removeElementById('automatempBlock__card__block');
+    removeElementById('autmatemp__unitEconom__block');
+    removeElementById('warehousesBlock');
+    removeElementById('automatemp__releaseDate');
 
+  } else if (currentUrl.includes('feedbacks')) {
+    feedbacks = [];
+
+  } else if (currentUrl.includes('brands')) {
+    console.log('Removed');
+    const searchModalDetail = document.querySelector('.searchModal__detail');
+    if (searchModalDetail) {
+      searchModalDetail.remove();
+    }
   }
 }
 

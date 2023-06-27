@@ -2,6 +2,38 @@
   display: none;
 }
 
+.automatemp__countRequest-items {
+  margin-top: 30px;
+  display: flex;
+}
+
+.automatemp__countRequest-item {
+  margin-right: 20px;
+  padding: 10px;
+  background-color: #F6F6F9;
+  border-radius: 5px;
+  font-size: 14px;
+  line-height: 17px;
+}
+
+.automatemp__countRequest-item__titlebox {
+  display: flex;
+}
+
+.automatemp__countRequest-item__title {
+  color: #000;
+  margin-right: 7px;
+}
+
+.automatemp__countRequest-item__img {
+  margin-right: 7px;
+  color: #000;
+}
+
+.automatemp__countRequest-item__period {
+  color: #868694;
+}
+
 .automatempBlock {
   margin-top: 40px;
   width: 100%;
@@ -527,7 +559,7 @@
 }
 
 .automatemp__unitEconom__select {
-  width: 220px;
+  width: 315px;
   padding: 9px 10px 9px 10px;
   font-style: normal;
   font-weight: 400;
@@ -546,6 +578,34 @@
 
 .automatemp__unitEconom__select::before {
   display: none;
+}
+
+.automatemp__unitEconom-input__box + .automatemp__unitEconom-input__box{
+  margin-top: 10px;
+}
+
+.automatemp__unitEconom__select-delivery_type{
+  margin-bottom: 12px;
+  height: 43.33px;  
+}
+
+.automatemp__unitEconom-input{
+  width: 315px;
+  padding: 11px 13px;
+  color: #000;
+  font-size: 15px;
+  font-weight: medium;
+  border: 1px solid #D3D4DC;
+  border-radius: 8px;
+}
+
+.automatemp__unitEconom-input::placeholder{
+  color: #B9B9C0;
+}
+
+.automatemp__unitEconom-calculation__submit{
+  margin-top: 20px;
+  width: 315px;
 }
 
 @media (max-width: 1024px) {
@@ -826,7 +886,7 @@ details[open]>summary:after {
   height: 37px;
 }
 
-.automatemp__warehouses-details:last-child .btn-base {
+.automatemp__warehouses-details__last .automatemp__warehouses-wrapper{
   margin-bottom: 40px;
 }
 
@@ -1141,7 +1201,7 @@ input[type="number"]::-webkit-outer-spin-button {
   max-width: 292px;
 }
 
-.resizeToMinimum .automatemp__warehouses-summary::after{
+.resizeToMinimum .automatemp__warehouses-summary::after {
   content: "+";
   border: none;
   width: 20px;
@@ -1150,10 +1210,106 @@ input[type="number"]::-webkit-outer-spin-button {
   line-height: 0;
 }
 
-.resizeToMinimum .automatemp__warehouses-details[open]>.automatemp__warehouses-summary::after{
+.resizeToMinimum .automatemp__warehouses-details[open]>.automatemp__warehouses-summary::after {
   transform: rotate(45deg);
 }
 
-.resizeToMinimum .automatemp__warehouses-wrapper{
+.resizeToMinimum .automatemp__warehouses-wrapper {
   max-width: 300px;
+}
+
+.product-order-quantity {
+  margin-right: 22px;
+}
+
+.automatemp__releaseDate {
+  font-size: 14px;
+  line-height: 20px;
+  color: #868695;
+}
+
+.catalog-page .brand-header__like {
+  display: flex;
+}
+
+.searchModal__detail {
+  position: relative;
+  margin-right: 40px;
+}
+
+.searchModal {
+  margin-top: 27px;
+  position: absolute;
+  right: 0;
+  z-index: 10;
+  background-color: #fff;
+  padding: 25px 25px 35px 25px;
+  box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+}
+
+.searchModal__summary {
+  display: flex;
+  margin-bottom: 0;
+  padding-right: 40px;
+}
+
+.searchModal__detail>.searchModal__summary::after {
+  margin-top: -4px;
+  border-right: 3px solid #B9B9C0;
+  border-bottom: 3px solid #B9B9C0;
+}
+
+.searchModal__summary-title {
+  margin-left: 10px;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 29px;
+}
+
+.product-page .user-activity__tabs {
+  overflow: visible !important;
+}
+
+.searchModal__detail-addQuestion{
+  margin-left: 30px;
+}
+
+.resizeToMinimum.searchModal__detail-addQuestion{
+  margin: 30px 0 30px 0;
+}
+
+.resizeToMinimum.searchModal__detail-addQuestion .searchModal__summary-title{
+  font-size: 18px;
+}
+
+.resizeToMinimum.searchModal__detail-addQuestion .automatempBlock__logo1{
+  max-width: 20px;
+}
+
+.resizeToMinimum .automatemp__warehouses-summary::after {
+  border: none;
+}
+
+.resizeToMinimum .automatemp__warehouses-details[open]>.automatemp__warehouses-summary::after {
+  border: none;
+}
+
+.resizeToMinimum.searchModal__detail-addQuestion[open]>.automatemp__warehouses-summary::after {
+  transform: rotate(45deg);
+}
+
+.resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-wrapper{
+  /* width: 100%; */
+  /* right: 0; */
+  left: 0;
+  max-width: 350px;
+  /* max-width: 100%; */
+}
+
+.resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-input{
+  /* width: 100%; */
+  /* right: 0;
+  left: 0;
+  max-width: 100%;   */
 }

@@ -71,6 +71,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       }
     }
   }
+
+  else if (message.command == "countRequest") {
+    getRequestCount(message.query).then(response => {
+      sendResponse(response)
+    })
+  }
+
   else if (message.command === 'cardPromoBlock') {
     let arr6 = []
     fetch(`https://carousel-ads.wildberries.ru/api/v4/carousel?nm=${message.id}`)
@@ -113,17 +120,17 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     let arr9 = []
     let arr10 = []
 
-    fetch(`https://4947.ru/wb_extension/api/size/${message.id}`)
+    fetch(`https://4947.ru/wb_extension/api/unit/size/${message.id}`)
       .then(response => response.json())
       .then((data) => {
         arr8 = data
       });
-    fetch(`https://4947.ru/wb_extension/api/commission/${message.id}`)
+    fetch(`https://4947.ru/wb_extension/api/unit/commission/${message.id}`)
       .then(response => response.json())
       .then((data) => {
         arr9 = data
       });
-    fetch(`https://4947.ru/wb_extension/api/warehouse`)
+    fetch(`https://4947.ru/wb_extension/api/unit/warehouse`)
       .then(response => response.json())
       .then((data) => {
         arr10 = data
@@ -143,7 +150,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
   else if (message.command === 'logistic') {
     let arr11 = []
-    fetch(`https://4947.ru/wb_extension/api/logistic/${message.article_id}/${message.warehouse_id}`)
+    fetch(`https://4947.ru/wb_extension/api/unit/logistic/${message.article_id}/${message.warehouse_id}`)
       .then(response => response.json())
       .then((data) => {
         arr11 = data;
@@ -169,6 +176,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 
   else if (message.command === 'rosgoscert') {
     rosGosCert(message.id).then(response => {
+      sendResponse(response)
+    })
+  }
+
+  else if (message.command == "releaseDate") {
+    getReleaseDate(message.id).then(response => {
       sendResponse(response)
     })
   }
@@ -205,6 +218,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       sendResponse(response)
     })
   }
+
+  else if (message.command === 'unitCalculateRequest') {
+    getUnitCalculation(message.id, message.data).then(response => {
+      sendResponse(response)
+    })
+  }
   return true;
 });
 
@@ -233,6 +252,23 @@ async function checkWarehouse(id) {
   return data;
 }
 
+async function getUnitCalculation(id, data) {
+  var responseData;
+  console.log(data);
+  await fetch(`https://4947.ru/wb_extension/api/unit/calculation/${id}`,
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(response => response.ok ? response.text() : null)
+    .then(response => {
+      responseData = response ? JSON.parse(response) : null;
+    })
+  return responseData;
+}
+
 async function checkWarehouseSize(id) {
   var data;
   await fetch(`https://4947.ru/wb_extension/api/stocks/${id}?get_by=sizes`,
@@ -245,9 +281,25 @@ async function checkWarehouseSize(id) {
   return data;
 }
 
+async function getRequestCount(query) {
+  const response = await fetch(`https://4947.ru/wb_extension/api/seasonality?query=${query}`,
+    { method: 'GET', });
+  const data = response.ok ? await response.json() : null;
+  console.log(data);
+  return data;
+}
+
+async function getReleaseDate(id) {
+  const response = await fetch(`https://4947.ru/wb_extension/api/create_product_date/${id}`,
+    { method: 'GET', });
+  const data = response.ok ? await response.json() : null;
+  console.log(data);
+  return data;
+}
+
 async function rosGosCert(id) {
   var data;
-  await fetch(`https://4947.ru/wb_extension/api/certificate/${id}`,
+  await fetch(`https://4947.ru/wb_extension/api/unit/certificate/${id}`,
     {
       method: 'GET',
     }).then(response => response.ok ? response.text() : null)
