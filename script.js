@@ -54,6 +54,10 @@ function getData() {
       fillAddQuestion(elm);
     })
 
+    waitForElm('.mix-block__find-similar.j-wba-card-item.j-find-similar').then(elm => {
+      fillCardPageMainImg(elm);
+    })
+
   } else if (currentUrl.includes('wildberries.ru/catalog') && currentUrl.includes('feedbacks')) {//Отзывы
     let prodId = currentUrl.split('/')[4]
     chrome.runtime.sendMessage({ command: 'feedbacks', id: prodId });
@@ -1146,6 +1150,49 @@ function fillWarehouses(updatePage) {//Блок со складами на ст�
       size = newSize;
       updateWarehouses(false);
     }
+
+    let productPageAsideContainer = document.querySelector('.product-page__aside-container')
+    let priceBlock = productPageAsideContainer.querySelector('.price-block__price-wrap')
+
+    productPageAsideContainer.insertAdjacentHTML('afterbegin', `
+      <div class="automatemp__changePrice " style="display:none;">
+        <div class="automatempBlock__logoButton ">
+          <a class="automatempBlock__logo__link " href="https://automate-mp.ru/">
+            <img class="automatempBlock__logo1 " src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
+            <img class="automatempBlock__logo2 " src="https://static.tildacdn.com/tild3436-3731-4466-b732-646465616236/1401a47a-25ef-4d45-b.svg"/>
+          </a>
+          <div class="automatemp__changePrice-close ">x<div>
+        </div>
+        <div class="automatemp__changePrice-content ">
+          
+        </div>
+      </div>
+    `)
+    priceBlock.addEventListener('click', function () {//При клике на цену все элементы в блоке со складами станоятся невидимыми
+      asideContainerChange('close')
+    })
+    document.querySelector('.automatemp__changePrice-close').addEventListener('click', function () {
+      asideContainerChange('open')
+    })
+
+    function asideContainerChange(what) {
+      if (what == 'close') {
+        document.querySelector('.product-page__price-block.product-page__price-block--aside').style.display = 'none'
+        document.querySelectorAll('.order-to-poned')[1].style.display = 'none'
+        document.querySelector('.product-page__aside-container .order').style.display = 'none'
+        document.querySelector('.product-page__aside-container .product-page__delivery').style.display = 'none'
+        document.querySelector('.product-page__aside-container #warehousesBlock').style.display = 'none'
+        document.querySelector('.automatemp__changePrice').style.display = 'block'
+      } else {
+        document.querySelector('.product-page__price-block.product-page__price-block--aside').style.display = 'block'
+        document.querySelectorAll('.order-to-poned')[1].style.display = 'block'
+        document.querySelector('.product-page__aside-container .order').style.display = 'flex'
+        document.querySelector('.product-page__aside-container .product-page__delivery').style.display = 'block'
+        document.querySelector('.product-page__aside-container #warehousesBlock').style.display = 'block'
+        document.querySelector('.automatemp__changePrice').style.display = 'none'
+      }
+    }
+
   }
 }
 
@@ -1217,6 +1264,21 @@ function fillAddQuestion(elm) {//Модальное окно с добавлен
     size = newSize;
     // updateWarehouses(false);
   }
+}
+
+function fillCardPageMainImg(elm) {
+  elm.insertAdjacentHTML('beforebegin', `
+    <a class="mix-block__find-similar j-wba-card-item j-find-similar automatemp__cardpage-mainImg__download-btn" id="automatemp__cardpage-mainImg__download-btn">
+      <span></span>
+    </a>
+  `)
+  let prodId = document.getElementById('productNmId').innerText;
+  document.querySelector('.automatemp__cardpage-mainImg__download-btn').addEventListener('click', function (evt) {
+    evt.preventDefault()
+    console.log(prodId);
+    chrome.runtime.sendMessage({ command: 'downloadImages', id: prodId }, (response) => {
+    })
+  })
 }
 
 //==================================
@@ -1594,6 +1656,8 @@ function clearData() {
     removeElementById('autmatemp__unitEconom__block');
     removeElementById('warehousesBlock');
     removeElementById('automatemp__releaseDate');
+    removeElementById('automatemp__cardpage-mainImg__download-btn');
+    document.querySelector('.searchModal__detail-addQuestion').remove();
 
   } else if (currentUrl.includes('feedbacks')) {
     feedbacks = [];

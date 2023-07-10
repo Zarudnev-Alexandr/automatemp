@@ -580,16 +580,16 @@
   display: none;
 }
 
-.automatemp__unitEconom-input__box + .automatemp__unitEconom-input__box{
+.automatemp__unitEconom-input__box+.automatemp__unitEconom-input__box {
   margin-top: 10px;
 }
 
-.automatemp__unitEconom__select-delivery_type{
+.automatemp__unitEconom__select-delivery_type {
   margin-bottom: 12px;
-  height: 43.33px;  
+  height: 43.33px;
 }
 
-.automatemp__unitEconom-input{
+.automatemp__unitEconom-input {
   width: 315px;
   padding: 11px 13px;
   color: #000;
@@ -599,11 +599,11 @@
   border-radius: 8px;
 }
 
-.automatemp__unitEconom-input::placeholder{
+.automatemp__unitEconom-input::placeholder {
   color: #B9B9C0;
 }
 
-.automatemp__unitEconom-calculation__submit{
+.automatemp__unitEconom-calculation__submit {
   margin-top: 20px;
   width: 315px;
 }
@@ -886,7 +886,7 @@ details[open]>summary:after {
   height: 37px;
 }
 
-.automatemp__warehouses-details__last .automatemp__warehouses-wrapper{
+.automatemp__warehouses-details__last .automatemp__warehouses-wrapper {
   margin-bottom: 40px;
 }
 
@@ -1271,19 +1271,19 @@ input[type="number"]::-webkit-outer-spin-button {
   overflow: visible !important;
 }
 
-.searchModal__detail-addQuestion{
+.searchModal__detail-addQuestion {
   margin-left: 30px;
 }
 
-.resizeToMinimum.searchModal__detail-addQuestion{
+.resizeToMinimum.searchModal__detail-addQuestion {
   margin: 30px 0 30px 0;
 }
 
-.resizeToMinimum.searchModal__detail-addQuestion .searchModal__summary-title{
+.resizeToMinimum.searchModal__detail-addQuestion .searchModal__summary-title {
   font-size: 18px;
 }
 
-.resizeToMinimum.searchModal__detail-addQuestion .automatempBlock__logo1{
+.resizeToMinimum.searchModal__detail-addQuestion .automatempBlock__logo1 {
   max-width: 20px;
 }
 
@@ -1299,7 +1299,7 @@ input[type="number"]::-webkit-outer-spin-button {
   transform: rotate(45deg);
 }
 
-.resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-wrapper{
+.resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-wrapper {
   /* width: 100%; */
   /* right: 0; */
   left: 0;
@@ -1307,9 +1307,34 @@ input[type="number"]::-webkit-outer-spin-button {
   /* max-width: 100%; */
 }
 
-.resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-input{
+.resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-input {
   /* width: 100%; */
   /* right: 0;
   left: 0;
   max-width: 100%;   */
+}
+
+.price-block__price-wrap{
+  cursor: pointer;
+}
+
+.automatemp__changePrice-close {
+  font-size: 20px;
+  line-height: 0;
+  margin-top: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.automatemp__cardpage-mainImg__download-btn{
+  right: 70px !important;
+  background-image: url('https://4947.ru/wb_extension/images/download_button.svg') !important;
+}
+
+.mix-block__find-similar{
+  height: 32px;
+}
+
+.mix-block__find-similar span{
+  display: none;
 }

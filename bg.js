@@ -224,6 +224,14 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       sendResponse(response)
     })
   }
+
+  else if (message.command === 'downloadImages') {
+    getDownloadImages(message.id).then(response => {
+      response.forEach(function (url) {
+        chrome.downloads.download({ url: url });
+      });
+    });
+  }
   return true;
 });
 
@@ -300,6 +308,18 @@ async function getReleaseDate(id) {
 async function rosGosCert(id) {
   var data;
   await fetch(`https://4947.ru/wb_extension/api/unit/certificate/${id}`,
+    {
+      method: 'GET',
+    }).then(response => response.ok ? response.text() : null)
+    .then(response => {
+      data = response ? JSON.parse(response) : null;
+    })
+  return data;
+}
+
+async function getDownloadImages(id) {
+  var data;
+  await fetch(`https://4947.ru/wb_extension/api/photos/${id}`,
     {
       method: 'GET',
     }).then(response => response.ok ? response.text() : null)
