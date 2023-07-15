@@ -906,7 +906,7 @@ function fillWarehouses(updatePage) {//Блок со складами на ст�
       <div id="warehousesBlock">
         <details class="automatemp__warehouses-details automatemp__warehouses-details__warehouses">
           <summary class="automatemp__warehouses-summary">Склады</summary>
-          <div class="automatemp__warehouses-wrapper">
+          <div class="automatemp__warehouses-wrapper" id="automatemp__warehouses-wrapper">
             <div class="automatemp__warehouses-radio">
               <input label="По складам" type="radio" id="automatemp__warehouses-warehouse" name="warehouse-size" value="warehouse" checked>
               <input label="По размерам" type="radio" id="automatemp__warehouses-size" name="warehouse-size" value="size">
@@ -1034,7 +1034,7 @@ function fillWarehouses(updatePage) {//Блок со складами на ст�
           chrome.runtime.sendMessage({ command: 'warehouses-warehouse', id: prodId }, (response) => {
             //Если результат запроса не пустой, отрисовываем основу таблицы
             if (response.length != 0) {
-              document.querySelector('.automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
+              document.querySelector('#automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
               <table class="automatemp__warehouses-table">
                 <tbody class="automatemp__warehouses-table__tbody">
                 </tbody>
@@ -1074,7 +1074,7 @@ function fillWarehouses(updatePage) {//Блок со складами на ст�
         if (document.getElementById('automatemp__warehouses-size').checked) {
           chrome.runtime.sendMessage({ command: 'warehouses-size', id: prodId }, (response) => {
             if (response.length != 0) {
-              document.querySelector('.automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
+              document.querySelector('#automatemp__warehouses-wrapper').insertAdjacentHTML('beforeend', `
               <table class="automatemp__warehouses-table">
                 <tbody class="automatemp__warehouses-table__tbody">
                 </tbody>
@@ -1151,29 +1151,150 @@ function fillWarehouses(updatePage) {//Блок со складами на ст�
       updateWarehouses(false);
     }
 
-    let productPageAsideContainer = document.querySelector('.product-page__aside-container')
-    let priceBlock = productPageAsideContainer.querySelector('.price-block__price-wrap')
+    var productPageAsideContainer = document.querySelector('.product-page__aside-container')
+    // var priceBlock = productPageAsideContainer.querySelector('.product-page__price-block.product-page__price-block--aside .price-block .price-block__content .price-block__price-wrap')
 
     productPageAsideContainer.insertAdjacentHTML('afterbegin', `
-      <div class="automatemp__changePrice " style="display:none;">
+      <div class="automatemp__changePrice" id="automatemp__changePrice-block" style="display:none;">
         <div class="automatempBlock__logoButton ">
           <a class="automatempBlock__logo__link " href="https://automate-mp.ru/">
             <img class="automatempBlock__logo1 " src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
             <img class="automatempBlock__logo2 " src="https://static.tildacdn.com/tild3436-3731-4466-b732-646465616236/1401a47a-25ef-4d45-b.svg"/>
           </a>
-          <div class="automatemp__changePrice-close ">x<div>
+          <div class="automatemp__changePrice-close ">x</div>
         </div>
         <div class="automatemp__changePrice-content ">
-          
+          <table class="automatemp__table-price">
+            <tr>
+              <td class="automatemp__price-label" id="priceBeforeDiscount">
+                Цена до скидки
+              </td>
+              <td class="automatemp__td-right" id="priceBeforeDiscount-beforespan">
+                3 499 ₽
+              </td>
+              <td class="automatemp__td-black" id="priceBeforeDiscount-span">
+              </td>              
+            </tr>
+            <tr>
+              <td class="automatemp__price-label" id="currentDiscount">
+                Текущая скидка
+              </td>
+              <td class="automatemp__td-right" id="priceBeforeDiscount-beforespan">
+                50%
+              </td>
+              <td class="automatemp__td-black" id="currentDiscount-span">
+              </td>              
+            </tr>
+            <tr>
+              <td class="automatemp__price-label" id="priceWithDiscount">
+                Цена со скидкой
+              </td>
+              <td class="automatemp__td-right" id="priceWithDiscount-beforespan">
+                1 749 ₽
+              </td>
+              <td class="automatemp__td-black" id="priceWithDiscount-span">
+              </td>              
+            </tr>
+          </table>
+         
         </div>
-      </div>
+        <div class="automatemp__warehouses-wrapper">
+          <div class="automatemp__warehouses-radio">
+            <input label="Цена до скидки" type="radio" id="automatemp__priceBeforeDiscount" name="price" value="priceBeforeDiscount" checked>
+            <input label="Размер скидки" type="radio" id="automatemp__currentDiscount" name="price" value="currentDiscount">
+          </div>
+        </div>
+    <div>
+        
+    </div>
+    <div class="automatemp__price-input__box">
+        <input class="automatemp__warehouses-input" type="number" id="priceInput" placeholder="Цена до скидки"min="0" value="3499" />
+        <input class="automatemp__warehouses-input" type="number" id="discountInput" placeholder="Размер скидки" min="0" max="100" value="50" style="display:none;"/>
+        <button class="automatemp__price-submit__btn btn-main" onClick="alert('Функционал пока в разработке')">Применить цену на WB</button>
+        <a class="automatemp__price-manual" href="#">Инструкция по изменению цен</a>
+        <h3 class="automatemp__monitoring-title">Мониторинг</h3>
+        <p class="automatemp__monitoring-text">Бот будет отслеживать, чтобы ваша <br/> цена не опускалась ниже заданой.</p>
+        <a class="automatemp__monitoring-btn">
+          <img class="automatemp__monitoring-btn__img" src="https://4947.ru/wb_extension/images/tg.svg">
+          <p class="automatemp__monitoring-btn__text">Попробовать бесплатно</p>
+        </a>
+    </div>    
     `)
-    priceBlock.addEventListener('click', function () {//При клике на цену все элементы в блоке со складами станоятся невидимыми
-      asideContainerChange('close')
+
+    var priceBeforeDiscountEl = document.getElementById('priceBeforeDiscount');
+    var priceBeforeDiscountElSpan = document.getElementById('priceBeforeDiscount-span');
+    var currentDiscountEl = document.getElementById('currentDiscount');
+    var currentDiscountElSpan = document.getElementById('currentDiscount-span');
+    var priceWithDiscountElSpan = document.getElementById('priceWithDiscount-span');
+
+    var priceInput = document.getElementById('priceInput');
+    var discountInput = document.getElementById('discountInput');
+
+    priceInput.addEventListener('input', updatePriceBeforeDiscount);
+    discountInput.addEventListener('input', updateDiscount);
+
+    function updatePriceBeforeDiscount() {
+      var price = parseFloat(priceInput.value);
+      priceBeforeDiscountElSpan.textContent = " → " + formatPrice(price) + " ₽";
+      updatePriceWithDiscount();
+    }
+
+    function updateDiscount() {
+      var discount = parseFloat(discountInput.value);
+      currentDiscountElSpan.textContent = " → " + formatPrice(discount) + " %";
+      updatePriceWithDiscount();
+    }
+
+    function updatePriceWithDiscount() {
+      var price = parseFloat(priceInput.value);
+      var discount = parseFloat(discountInput.value);
+
+      var discountedPrice = price * (1 - discount / 100);
+      priceWithDiscountElSpan.textContent = " → " + formatPrice(discountedPrice) + " ₽";
+    }
+
+    function formatPrice(price) {
+      return price.toLocaleString('ru-RU');
+    }
+
+    function fillPrice() {
+      if (document.getElementById('automatemp__priceBeforeDiscount').checked) {
+        document.getElementById('priceInput').style.display = 'block';
+        document.getElementById('discountInput').style.display = 'none';
+      }
+    }
+
+    fillPrice() //Когда пользователь только зайдет на страницу, у него сразу появитмя возможность ввести цену.
+
+    document.getElementById('automatemp__priceBeforeDiscount').addEventListener('click', function () {
+      //Если пользователь выбрал склады
+      fillPrice();
     })
-    document.querySelector('.automatemp__changePrice-close').addEventListener('click', function () {
+
+    document.getElementById('automatemp__currentDiscount').addEventListener('click', function () {
+      //Если пользователь выбрал размер скидки
+      if (document.querySelector('#automatemp__currentDiscount').checked) {
+        document.getElementById('discountInput').style.display = 'block';
+        document.getElementById('priceInput').style.display = 'none';
+      }
+    })
+
+    // function updatePrice() {
+    // var priceBlock = productPageAsideContainer.querySelector('')
+    waitForElm('.product-page__price-block.product-page__price-block--aside .price-block .price-block__content .price-block__price-wrap').then((elm) => {
       asideContainerChange('open')
+
+      console.log(elm);
+
+      elm.addEventListener('click', function () {//При клике на цену все элементы в блоке со складами станоятся невидимыми
+        asideContainerChange('close')
+      })
+      elm = ''
+      document.querySelector('.automatemp__changePrice-close').addEventListener('click', function () {
+        asideContainerChange('open')
+      })
     })
+
 
     function asideContainerChange(what) {
       if (what == 'close') {
@@ -1192,6 +1313,9 @@ function fillWarehouses(updatePage) {//Блок со складами на ст�
         document.querySelector('.automatemp__changePrice').style.display = 'none'
       }
     }
+    // }
+
+    // updatePrice()
 
   }
 }
@@ -1655,9 +1779,11 @@ function clearData() {
     removeElementById('automatempBlock__card__block');
     removeElementById('autmatemp__unitEconom__block');
     removeElementById('warehousesBlock');
+    removeElementById('automatemp__changePrice-block');
     removeElementById('automatemp__releaseDate');
     removeElementById('automatemp__cardpage-mainImg__download-btn');
     document.querySelector('.searchModal__detail-addQuestion').remove();
+    document.querySelector('.product-page__price-block.product-page__price-block--aside .price-block .price-block__content .price-block__price-wrap').remove()
 
   } else if (currentUrl.includes('feedbacks')) {
     feedbacks = [];

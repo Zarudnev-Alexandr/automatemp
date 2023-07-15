@@ -293,6 +293,7 @@ async function getRequestCount(query) {
   const response = await fetch(`https://4947.ru/wb_extension/api/seasonality?query=${query}`,
     { method: 'GET', });
   const data = response.ok ? await response.json() : null;
+  console.log('xxx');
   console.log(data);
   return data;
 }

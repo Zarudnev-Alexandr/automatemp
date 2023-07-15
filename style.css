@@ -1300,21 +1300,11 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-wrapper {
-  /* width: 100%; */
-  /* right: 0; */
   left: 0;
   max-width: 350px;
-  /* max-width: 100%; */
 }
 
-.resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-input {
-  /* width: 100%; */
-  /* right: 0;
-  left: 0;
-  max-width: 100%;   */
-}
-
-.price-block__price-wrap{
+.price-block__price-wrap {
   cursor: pointer;
 }
 
@@ -1326,15 +1316,97 @@ input[type="number"]::-webkit-outer-spin-button {
   cursor: pointer;
 }
 
-.automatemp__cardpage-mainImg__download-btn{
+.automatemp__cardpage-mainImg__download-btn {
   right: 70px !important;
   background-image: url('https://4947.ru/wb_extension/images/download_button.svg') !important;
 }
 
-.mix-block__find-similar{
+.mix-block__find-similar {
   height: 32px;
 }
 
-.mix-block__find-similar span{
+.mix-block__find-similar span {
   display: none;
+}
+
+.automatemp__changePrice-content {
+  margin-top: 30px;
+  color: #8B8B8B;
+}
+
+.automatemp__table-price {
+  margin-bottom: 30px;
+}
+
+.automatemp__td-right,
+.automatemp__td-black,
+.automatemp__price-label {
+  padding-bottom: 10px;
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  padding-right: 5px;
+  text-overflow: ellipsis;
+  padding-bottom: 2px;
+}
+
+.automatemp__price-label {
+  max-width: 145px;
+}
+
+.automatemp__td-black {
+  color: #000;
+}
+
+.automatemp__price-label {
+  padding-right: 15px;
+}
+
+.automatemp__td-right {
+  float: right;
+}
+
+.automatemp__changePrice .automatemp__warehouses-wrapper {
+  margin-bottom: 20px;
+}
+
+.automatemp__price-input__box {
+  display: flex;
+  flex-direction: column;
+}
+
+.automatemp__price-submit__btn {
+  justify-content: center;
+  align-items: center;
+}
+
+.automatemp__price-manual {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #8B8B8B;
+  margin-bottom: 31px;
+}
+
+.automatemp__monitoring-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.automatemp__monitoring-text {
+  margin-bottom: 20px;
+}
+
+.automatemp__monitoring-btn {
+  padding: 12px 19px;
+  background-color: #1B92D1;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-around;
+  cursor: pointer;
+}
+
+.automatemp__monitoring-btn__text{
+  color: #fff;
+  font-size: 16px;
 }
