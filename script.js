@@ -1,3 +1,8 @@
+function reloadPageOnNavigation() {
+  location.reload();
+}
+// Добавляем обработчик события popstate
+window.addEventListener('popstate', reloadPageOnNavigation);
 let searchText = {}
 let currentUrl = location.href;
 const checkPageTransition = () => {
@@ -61,6 +66,9 @@ function getData() {
   } else if (currentUrl.includes('wildberries.ru/catalog') && currentUrl.includes('feedbacks')) {//Отзывы
     let prodId = currentUrl.split('/')[4]
     chrome.runtime.sendMessage({ command: 'feedbacks', id: prodId });
+    waitForElm('.product-feedbacks__header .product-feedbacks__title').then(elm => {
+      fillAddQuestionFeedbacks(elm);
+    })
   } else if (currentUrl.includes('wildberries.ru/brands')) {
     console.log('Бренды');
     fillLikesOnBrand();
@@ -467,8 +475,8 @@ function unitEconomFillPage() {//Юнит экономика
 
 
                 <h3 class="product-params__caption automatemp__unitEconom__table__title">Логистика, хранение и приёмка *</h3>
-                <select class="automatemp__unitEconom__select automatemp__unitEconom__select-unit" id="automatemp__unitEconom__select">
-                </select>
+                
+                ${automatempSelect('wareHouses', wareHouses)}
 
                 <table class="product-params__table automatemp__logistic__table">
                   <tbody class="automatemp__logistic__table__tbody">
@@ -517,9 +525,8 @@ function unitEconomFillPage() {//Юнит экономика
 
                 <h3 class="product-params__caption automatemp__unitEconom__table__title">Расчеты</h3>
                 <form class="automatemp__unitEconom-calcForm">
-                  <select class="automatemp__unitEconom__select automatemp__unitEconom__select-delivery_type" id="#automatemp__unitEconom__select-delivery_type" size="1">
-                    <option value="fbo">FBO</option>
-                  </select>
+
+                  ${automatempSelect('unitEcon', [{id: "fbo", name: "FBO"}])}
                   <div class="automatemp__unitEconom-input__box">
                     <input class="automatemp__unitEconom-input" type="float" id="automatemp__unitEconom-input__purchase_price" placeholder="Цена закупки, ₽">
                   </div>
@@ -544,6 +551,7 @@ function unitEconomFillPage() {//Юнит экономика
                   <div class="automatemp__unitEconom-input__box">
                     <input class="automatemp__unitEconom-input" type="int" id="automatemp__unitEconom-input__profit_target" placeholder="Цель по прибыли, ₽">
                   </div>
+                  <div id="error-message" style="color: red; display: none;"></div>
                   <button class="btn-base automatemp__unitEconom-calculation__submit" type="submit">
                     Посчитать
                   </button>
@@ -566,6 +574,29 @@ function unitEconomFillPage() {//Юнит экономика
   `)
     })
   }
+
+  waitForElm('.automatemp__unitEconom-calcForm').then(elm => {
+    elm.addEventListener('submit', calculateEconomy);    
+  })
+
+  function calculateEconomy() {
+    // Получаем значение первого input
+    const purchasePriceInput = document.getElementById('automatemp__unitEconom-input__purchase_price');
+    const purchasePriceValue = parseFloat(purchasePriceInput.value.replace(',', '.')); // Парсим значение, заменяя запятую на точку
+
+    // Проверяем, пустое ли поле или значение неправильное
+    if (isNaN(purchasePriceValue) || purchasePriceValue <= 0) {
+      const errorMessage = document.getElementById('error-message');
+      errorMessage.textContent = `Заполните поле «Цена закупки, ₽»`;
+      errorMessage.style.display = 'block';
+      return false; // Останавливаем отправку формы
+    }
+
+    // Скрываем красную надпись в случае успешной проверки
+    document.getElementById('error-message').style.display = 'none';
+    return true;
+  }
+
   waitForElm('#automatemp__card__table__button').then((elm) => {
     elm.addEventListener('click', function () {
       let table = document.querySelector('#automatemp__collapsible__gradient');
@@ -581,25 +612,13 @@ function unitEconomFillPage() {//Юнит экономика
     });
   })
 
-  waitForElm('.automatemp__unitEconom__select-unit').then((elm) => {
-    var selectString = '';
-    wareHouses.forEach((item, index) => {
-      if (index === 0) {
-        selectString += `<option value="${item.id}" selected>${item.name}</option>`;
-      } else {
-        selectString += `<option value="${item.id}">${item.name}</option>`;
-      }
-    });
-    [...document.getElementsByClassName('automatemp__unitEconom__select-unit')].forEach(elem => {
-      elem.insertAdjacentHTML('beforeend', selectString);
-    });
-
-    [...document.getElementsByClassName('automatemp__unitEconom__select-unit')].forEach(elem => {
+  waitForElm('.__select-wareHouses').then((elm) => {
+    [...document.getElementsByClassName('__select-wareHouses')].forEach(elem => {
       elem.addEventListener('change', e => {
         var prodId;
         waitForElm('#productNmId').then((elm) => {
           prodId = document.getElementById('productNmId').innerText;
-          chrome.runtime.sendMessage({ command: 'logistic', article_id: prodId, warehouse_id: e.target.value }, (response) => { })
+          chrome.runtime.sendMessage({ command: 'logistic', article_id: prodId, warehouse_id: localStorage.getItem('id-wareHouses') }, (response) => { })
         })
       })
     });
@@ -618,11 +637,11 @@ function unitEconomFillPage() {//Юнит экономика
   })
 
   function fillUnitCalc() {
-    const deliveryTypeSelect = document.querySelector('.automatemp__unitEconom__select-delivery_type');
-    const deliveryTypeOptions = Array.from(deliveryTypeSelect.selectedOptions, option => option.value);
+    // const deliveryTypeSelect = document.querySelector('.automatemp__unitEconom__select-delivery_type');
+    // const deliveryTypeOptions = Array.from(deliveryTypeSelect.selectedOptions, option => option.value);
 
-    const warehouseSelect = document.querySelector('#automatemp__unitEconom__select');
-    const warehouseOptions = Array.from(warehouseSelect.selectedOptions, option => option.value);
+    // const warehouseSelect = document.querySelector('#automatemp__unitEconom__select');
+    // const warehouseOptions = Array.from(warehouseSelect.selectedOptions, option => option.value);
 
     var input1 = document.getElementById('automatemp__unitEconom-input__purchase_price').value;
     var input2 = document.getElementById('automatemp__unitEconom-input__additional').value;
@@ -635,14 +654,14 @@ function unitEconomFillPage() {//Юнит экономика
 
     // Формируем данные для отправки на сервер
     var data = {
-      delivery_type: deliveryTypeOptions[0],
-      warehouse_id: parseInt(warehouseOptions[0]),
+      delivery_type: String(localStorage.getItem('id-unitEcon')),
+      warehouse_id: parseInt(localStorage.getItem('id-wareHouses')),
       purchase_price: parseFloat(input1),
       additional: parseFloat(input2),
       logistic_to_mp: parseFloat(input3),
       wrap_days: parseInt(input4),
-      redemtion_percent: parseInt(input5),
-      merriage_percent: parseInt(input6),
+      redemption_percent: parseInt(input5),
+      marriage_percent: parseInt(input6),
       tax_rate: parseInt(input7),
       profit_target: parseInt(input8),
     };
@@ -707,7 +726,7 @@ function rewriteLogistic() {//Перезапись логистики в юни�
 
 function fillCardPage() {//Блок с рекламными ставками промотовара
   if (cpmData.length !== 0) {
-    waitForElm('.product-page__goods-slider--promo').then((elm) => {
+    waitForElm('.product-page__carousel-wrap').then((elm) => {
       elm.insertAdjacentHTML('beforebegin', `
         <div class="automatempBlock__card__block" id="automatempBlock__card__block">
           <div class="automatempBlock__card__inner">
@@ -1339,14 +1358,21 @@ function fillPromos(wheel) {//Отрисовка цены на карточка�
 
 function fillAddQuestion(elm) {//Модальное окно с добавлением отзыва
   elm.insertAdjacentHTML('beforeend', `
-    <details class="automatemp__warehouses-details automatemp__warehouses-details__warehouses searchModal__detail searchModal__detail-addQuestion">
+    <details class="automatemp__warehouses-details automatemp__warehouses-details__warehouses searchModal__detail searchModal__detail-addQuestion" id="searchModal__detail-addQuestion">
       <summary class="automatemp__warehouses-summary searchModal__summary">
         <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
         <h2 class="searchModal__summary-title">Добавить вопрос</h2>
       </summary>
-      ${searchModal('productQuestions')}
+      ${searchModal('productQuestions', 'textarea')}
     </details>
   `)
+  document.addEventListener('click', function (event) {
+    const detail = document.getElementById('searchModal__detail-addQuestion');
+    if (!detail.contains(event.target)) {
+      detail.removeAttribute('open');
+    }
+  });
+
 
   // updateWarehouses(true)
   waitForElm('.searchModal__detail-addQuestion').then((elm) => {
@@ -1573,6 +1599,24 @@ function fillFeedbacks() {//Калькулятор оценок в отзыва�
   }
 }
 
+function fillAddQuestionFeedbacks(elm) {
+  elm.insertAdjacentHTML('afterend', `
+    <details class="automatemp__warehouses-details automatemp__warehouses-details__warehouses searchModal__detail searchModal__detail-addQuestion" id="searchModal__detail-addQuestion">
+      <summary class="automatemp__warehouses-summary searchModal__summary">
+        <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
+        <h2 class="searchModal__summary-title">Добавить вопрос</h2>
+      </summary>
+      ${searchModal('productQuestions', 'input', 'Задайте вопрос о товаре')}
+    </details>
+  `)
+  document.addEventListener('click', function (event) {
+    const detail = document.getElementById('searchModal__detail-addQuestion');
+    if (!detail.contains(event.target)) {
+      detail.removeAttribute('open');
+    }
+  });
+}
+
 //==================================
 //Страница бренда-------------------
 //==================================
@@ -1585,7 +1629,7 @@ function fillLikesOnBrand() {//Модальное окно с накруткой
           <img class="automatempBlock__logo1" src="https://static.tildacdn.com/tild3039-6432-4739-b839-313265366638/d2d4e200-dc87-4d6c-a.svg"/>
           <h2 class="searchModal__summary-title">Добавить лайки</h2>
         </summary>
-        ${searchModal('brandMainLikes')}
+        ${searchModal('brandMainLikes', 'input', 'Поисковый запрос')}
       </details>
     `)
   })
@@ -1640,14 +1684,18 @@ function waitForElm(selector) {//Важнейшая функция, описан
   });
 }
 
-function searchModal(name) {//Заготовка для модалки с запросом
+function searchModal(name, type, placeholder) {//Заготовка для модалки с запросом
   newElm =
     `
       <div class="automatemp__warehouses-wrapper searchModal searchModal__${name}">
-        <input class="automatemp__warehouses-input" type="text", id="automatemp__warehouses-input__${name}" placeholder="Поисковый запрос"/>
-        <div class="automatemp__warehouses-content__box">
+      ${type == 'textarea' ? (
+      `<textarea class="automatemp__warehouses-input automatemp__warehouses-textarea" id="automatemp__val-msg__${name}" placeholder="Каждый вопрос с новой строки" rows="5" style="resize: none;"></textarea>`
+    ) : (
+      `<input class="automatemp__warehouses-input" type="text", id="automatemp__warehouses-input__${name}" placeholder="${placeholder}"/>`
+    )}                
+        <div class="automatemp__warehouses-content__box ${type == 'textarea' ? 'automatemp__warehouses-content__box-textarea' : ''}">
           <form>
-            <div class="__select __select-${name}" data-state="">
+            <div class="__select __select-${name} ${type == 'textarea' ? '__select-textarea' : ''}">
               <div class="__select__title __select__title-${name}" data-default="3 часа">3 часа</div>
               <div class="__select__content __select__content-${name}">
                 <input id="${name}-1" class="__select__input" type="radio" name="${name}Select" />
@@ -1667,12 +1715,18 @@ function searchModal(name) {//Заготовка для модалки с зап
               </div>
             </div>
           </form>
-          <div class="number-input">
-            <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()"></button>
-            <input class="quantity" min="0" name="quantity" value="0" type="number">
-            <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()"></button>
+          ${type != 'textarea' ? (
+      `
+            <div class="number-input">
+              <button onclick="this.parentNode.querySelector('input[type=number]').stepDown()"></button>
+              <input class="quantity" min="0" name="quantity" value="0" type="number">
+              <button onclick="this.parentNode.querySelector('input[type=number]').stepUp()"></button>
+            </div>          
+            `
+    ) : (
+      ``
+    )}
           </div>
-        </div>
         <button class="btn-base automatemp__warehouses-order_btn">Заказать</button>
       </div>
     `
@@ -1700,6 +1754,69 @@ function searchModal(name) {//Заготовка для модалки с зап
     newElm
   )
 }
+
+function automatempSelect(name, options) {
+  let optionsToUse = [];
+  if (options.length > 0 && typeof options[0] === 'object') {
+    optionsToUse = options.map(item => item.name);
+    localStorage.setItem(`id-${name}`, options[0].id)
+  } else {
+    optionsToUse = options;
+    localStorage.setItem(`id-${name}`, options[0])
+  }
+  
+
+  newElm = `  
+    <div class="__select __select-${name} automatemp__unitEconom__select-delivery_type" data-state="">
+      <div class="__select__title __select__title-${name}" data-default="${optionsToUse[0]}">${optionsToUse[0]}</div>
+      <div class="__select__content __select__content-${name}">
+      <input id="${name}--1" class="__select__input" type="radio" name="${name}Select" />
+      <label for="${name}--1" class="__select__label __select__label-null">pass</label>
+      ${optionsToUse.map((item, index) => {
+    const checkedAttribute = index === 0 ? 'checked' : '';
+    return (
+      `<input id="${name}-${index}" class="__select__input" type="radio" name="${name}Select" ${checkedAttribute} />
+          <label for="${name}-${index}" class="__select__label __select__label-${name}">${item}</label>`
+    );
+  }).join('')}
+      </div>
+    </div>
+  `;
+
+  waitForElm(`#${name}-${optionsToUse.length - 1}`).then(elm => {
+    const selectSingle = document.querySelector(`.__select-${name}`);
+    const selectSingle_title = selectSingle.querySelector(`.__select__title-${name}`);
+    const selectSingle_labels = selectSingle.querySelectorAll(`.__select__label-${name}`);
+
+    selectSingle_title.addEventListener('click', () => {
+      if ('active' === selectSingle.getAttribute('data-state')) {
+        selectSingle.setAttribute('data-state', '');
+      } else {
+        selectSingle.setAttribute('data-state', 'active');
+      }
+    });
+
+    // Close when click to option
+    for (let i = 0; i < selectSingle_labels.length; i++) {
+      selectSingle_labels[i].addEventListener('click', (evt) => {
+        selectSingle_title.textContent = evt.target.textContent;
+        selectSingle.setAttribute('data-state', '');
+
+        // Получаем id для словаря и передаем его в функцию
+        if (options.length > 0 && typeof options[0] === 'object') {
+          const selectedId = options[i].id;
+          // yourFunction(selectedId); // Здесь вызываем вашу функцию и передаем id
+          localStorage.setItem(`id-${name}`, selectedId)
+        }
+      });
+    }
+  });
+
+  return newElm;
+}
+
+
+
 
 function ImgLinkSlice(nmId) {//Генерирование правильной ссылки на картинку товара WB
   const nm = parseInt(nmId, 10),

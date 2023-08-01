@@ -608,6 +608,14 @@
   width: 315px;
 }
 
+.automatemp__unitEconom-calcForm .__select{
+  width: 315px;
+}
+
+.__select.__select-wareHouses.automatemp__unitEconom__select-delivery_type{
+  width: 315px;
+}
+
 @media (max-width: 1024px) {
   .automatemp__unitEconom__select {
     margin-bottom: 10px;
@@ -735,7 +743,8 @@ ul.automatemp-modalCert--content li:after {
 
 .automatemp-modalCert__btn-base {
   margin-top: 40px;
-  max-width: 235px;
+  margin-bottom: 20px;
+  /* max-width: 235px; */
   position: absolute !important;
   left: 40px;
 }
@@ -853,6 +862,11 @@ details[open]>summary:after {
   margin-top: 40px;
 }
 
+.automatemp__warehouses-summary{
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
 .automatemp__warehouses-details>.automatemp__warehouses-summary:after {
   content: '';
   display: block;
@@ -862,7 +876,7 @@ details[open]>summary:after {
   border-bottom: 2px solid #b9b9c1;
   position: absolute;
   top: 50%;
-  right: 16px;
+  right: 5px;
   margin-top: -6px;
   box-sizing: content-box;
   transform-origin: 7px 7px;
@@ -888,6 +902,10 @@ details[open]>summary:after {
 
 .automatemp__warehouses-details__last .automatemp__warehouses-wrapper {
   margin-bottom: 40px;
+}
+
+.automatemp__warehouses-details[open]>.automatemp__warehouses-wrapper{
+  margin-bottom: 20px;
 }
 
 .automatemp__warehouses-radio input {
@@ -968,12 +986,16 @@ details[open]>summary:after {
 }
 
 #warehousesBlock details+details {
-  margin-top: 20px;
+  margin-top: 0px;
 }
 
 .automatemp__warehouses-content__box {
   display: flex;
   justify-content: space-between;
+}
+
+.automatemp__warehouses-content__box-textarea{
+  display: block;
 }
 
 .automatemp__warehouses-input {
@@ -1045,9 +1067,9 @@ input[type="number"]::-webkit-outer-spin-button {
   content: "";
   position: absolute;
   line-height: 0;
-  top: 50%;
+  top: 44%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -90%);
 }
 
 .number-input button:nth-child(1):before {
@@ -1072,7 +1094,7 @@ input[type="number"]::-webkit-outer-spin-button {
   -moz-appearance: textfield;
   width: 40px;
   height: 100%;
-  font-size: 24px;
+  font-size: 14px;
   padding-right: 4px;
   padding-left: 4px;
   border: none;
@@ -1093,6 +1115,10 @@ input[type="number"]::-webkit-outer-spin-button {
   position: relative;
   width: 163px;
   height: 39px;
+}
+
+.__select-textarea{
+  width: 100%;
 }
 
 .__select[data-state=active] .__select__title::before {
@@ -1207,7 +1233,14 @@ input[type="number"]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   transform: rotate(0);
+  right: 0px;
+  font-size: 35px;
+  font-weight: 350;
   line-height: 0;
+}
+
+.resizeToMinimum details{
+  margin-bottom: 15px;
 }
 
 .resizeToMinimum .automatemp__warehouses-details[open]>.automatemp__warehouses-summary::after {
@@ -1247,6 +1280,7 @@ input[type="number"]::-webkit-outer-spin-button {
   box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.1);
   border-radius: 15px;
 }
+
 
 .searchModal__summary {
   display: flex;
@@ -1302,6 +1336,10 @@ input[type="number"]::-webkit-outer-spin-button {
 .resizeToMinimum.searchModal__detail-addQuestion .automatemp__warehouses-wrapper {
   left: 0;
   max-width: 350px;
+  position: static;
+  box-shadow: none;
+  padding: 0;
+  width: 300px;
 }
 
 .price-block__price-wrap {
@@ -1406,7 +1444,17 @@ input[type="number"]::-webkit-outer-spin-button {
   cursor: pointer;
 }
 
-.automatemp__monitoring-btn__text{
+.automatemp__monitoring-btn__text {
   color: #fff;
   font-size: 16px;
+}
+
+.automatemp__warehouses-textarea{
+  padding-top: 8px;
+  height: auto;
+  border: transparent;
+}
+
+#error-message{
+  margin-top: 15px;
 }

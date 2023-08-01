@@ -154,6 +154,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       .then(response => response.json())
       .then((data) => {
         arr11 = data;
+        console.log(data);
       });
 
     fetchLogistic()
